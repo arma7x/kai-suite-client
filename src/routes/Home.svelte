@@ -569,7 +569,11 @@
       conBtnLabel = 'Connect'
       ws = null
     }
-    ws.onerror = () => {}
+    ws.onerror = () => {
+      conBtnLabel = 'Connect'
+      ws.close()
+      ws = null
+    }
     ws.onmessage = (event) => {
       var protocol = JSON.parse(event.data)
       var data = JSON.parse(protocol.data)
@@ -598,11 +602,44 @@
     ws = null
   }
 
+  function syncContact() {
+    var contacts = [];
+    var cursor = navigator.mozContacts.getAll()
+    cursor.onsuccess = function () {
+      if (!this.done) {
+        if(cursor.result !== null) {
+          const namespace = `local:people:${cursor.result.id}`
+          console.log(namespace)
+          if (ws != null) {
+            const txd = {
+              namespace: namespace,
+              kai_contact: cursor.result,
+            }
+            const tx = {
+              flag: 4,
+              data: JSON.stringify(txd),
+            }
+            ws.send(JSON.stringify(tx))
+          }
+          contacts.push(cursor.result)
+          this.continue()
+        }
+      }
+    }
+    cursor.onerror = (err) => {
+      console.warn(`No file found: ${err.toString()}`);
+    }
+  }
+
 </script>
 
 <main id="home-screen" data-pad-top="28" data-pad-bottom="30">
   <ListView className="{navClass}" title="{getAppProp().localization.langByLocale('hello', locale, 'Svelte')}" subtitle="Goto room screen" onClick={() => onClickHandler('room')}/>
   <Button className="{navClass}" text="{conBtnLabel}" onClick={toggleConnection}>
+    <span slot="leftWidget" class="kai-icon-arrow" style="margin:0px 5px;-moz-transform: scale(-1, 1);-webkit-transform: scale(-1, 1);-o-transform: scale(-1, 1);-ms-transform: scale(-1, 1);transform: scale(-1, 1);"></span>
+    <span slot="rightWidget" class="kai-icon-arrow" style="margin:0px 5px;"></span>
+  </Button>
+  <Button className="{navClass}" text="Sync Contact" onClick={syncContact}>
     <span slot="leftWidget" class="kai-icon-arrow" style="margin:0px 5px;-moz-transform: scale(-1, 1);-webkit-transform: scale(-1, 1);-o-transform: scale(-1, 1);-ms-transform: scale(-1, 1);transform: scale(-1, 1);"></span>
     <span slot="rightWidget" class="kai-icon-arrow" style="margin:0px 5px;"></span>
   </Button>
