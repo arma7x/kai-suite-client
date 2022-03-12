@@ -3,14 +3,20 @@
   import { AppBar, SoftwareKey } from './components';
   import { Home, Room } from './routes';
   import { onMount, onDestroy } from 'svelte';
+  import localForage from 'localforage';
   import { Localization } from './utils/localization';
 
   export let localization = new Localization('en-US', 'langs');
   export let appBar;
   export let softwareKey;
 
+  localForage.setDriver(localForage.INDEXEDDB);
+  const dbName = 'SYNC';
+  const syncContactDb = localForage.createInstance({ name: dbName, storeName: 'contacts' });
+  const syncEventDb = localForage.createInstance({ name: dbName, storeName: 'events' });
+
   export const getAppProp = () => {
-    return {appBar, softwareKey, localization};
+    return {appBar, softwareKey, localization, syncContactDb, syncEventDb};
   }
 
   onMount(() => {
