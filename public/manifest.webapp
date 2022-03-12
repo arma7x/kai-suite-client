@@ -1,0 +1,51 @@
+{
+  "name": "Kai Suite",
+  "description": "PC Suite/Companion for KaiOS device",
+  "version": "1.0.0",
+  "launch_path": "/index.html",
+  "theme": "#ff3e00",
+  "theme_color": "#ff3e00",
+  "background_color": "#ff3e00",
+  "fullscreen": "true",
+  "chrome": {
+    "statusbar": "overlap"
+  },
+  "orientation": "default",
+  "icons": {
+    "56": "/icons/icon56x56.png",
+    "112": "/icons/icon112x112.png"
+  },
+  "categories": [
+    "utilities"
+  ],
+  "developer": {
+    "name": "arma7x",
+    "url": "https://github.com/arma7x/kai-suite-client"
+  },
+  "origin": "app://kai-suite.arma7x.com",
+  "type": "certified",
+  "permissions": {
+    "sms": {
+      "description": "WebSMS permission"
+    },
+    "contacts": {
+      "access": "readwrite",
+      "description": "Manage KaiOS contact list"
+    },
+    "desktop-notification": {
+      "description": "Required for display notification"
+    }
+  },
+  "messages": [
+    { "serviceworker-notification": "/index.html" },
+    { "sms-received": "/index.html" }
+  ],
+  "locales": {
+    "en-US": {
+      "name": "Kai Suite",
+      "subtitle": "PC Suite/Companion for KaiOS device",
+      "description": "PC Suite/Companion for KaiOS device"
+    }
+  },
+  "default_locale": "en"
+}
