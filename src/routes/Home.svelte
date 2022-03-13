@@ -542,11 +542,14 @@
   });
 
   onDestroy(() => {
+    if (ws)
+      ws.close()
     console.log('onDestroy', name);
     navInstance.detachListener();
   });
 
   // Kai Suite
+  let contactsQueue = [];
   let conBtnLabel: string = 'Connect';
   let ws: any;
 
@@ -695,8 +698,9 @@
           const tx = { flag: 2, data: JSON.stringify(txd) }
           ws.send(JSON.stringify(tx))
         });
-      } else if (protocol.flag === 1) { // TxDeleteContact
-
+      } else if (protocol.flag === 3) { // TxSyncLocalContact
+        console.log("TxSyncLocalContact:", data)
+        dequeueContact();
       }
     }
   }
@@ -709,32 +713,42 @@
     ws = null
   }
 
-  function syncContact() {
-    var contacts = [];
+  function syncLocalContacts() {
     var cursor = navigator.mozContacts.getAll()
     cursor.onsuccess = function () {
       if (!this.done) {
         if(cursor.result !== null) {
-          const namespace = `local:people:${cursor.result.id}`
-          console.log(namespace, cursor.result)
-          if (ws != null) {
-            const txd = {
-              namespace: namespace,
-              kai_contact: cursor.result,
+          var isLocal = cursor.result.key == null;
+          if (cursor.result.category == null) {
+            isLocal = true;
+          } else {
+            for (var c in cursor.result.category) {
+              if (cursor.result.category[c].indexOf('local:') > -1) {
+                isLocal = true;
+                break;
+              }
             }
-            const tx = {
-              flag: 4,
-              data: JSON.stringify(txd),
-            }
-            ws.send(JSON.stringify(tx))
           }
-          contacts.push(cursor.result)
+          if (isLocal)
+            contactsQueue.push(cursor.result)
           this.continue()
         }
+      } else if (this.done) {
+        console.log('Contacs:', contactsQueue.length)
+        dequeueContact();
       }
     }
     cursor.onerror = (err) => {
       console.warn(`No file found: ${err.toString()}`);
+    }
+  }
+
+  function dequeueContact() {
+    if (ws != null && contactsQueue.length > 0) {
+      var contact = contactsQueue.pop();
+      const txd = { kai_contact: contact }
+      const tx = { flag: 8, data: JSON.stringify(txd) }
+      ws.send(JSON.stringify(tx))
     }
   }
 
@@ -743,12 +757,10 @@
 <main id="home-screen" data-pad-top="28" data-pad-bottom="30">
   <ListView className="{navClass}" title="{getAppProp().localization.langByLocale('hello', locale, 'Svelte')}" subtitle="Goto room screen" onClick={() => onClickHandler('room')}/>
   <Button className="{navClass}" text="{conBtnLabel}" onClick={toggleConnection}>
-    <span slot="leftWidget" class="kai-icon-arrow" style="margin:0px 5px;-moz-transform: scale(-1, 1);-webkit-transform: scale(-1, 1);-o-transform: scale(-1, 1);-ms-transform: scale(-1, 1);transform: scale(-1, 1);"></span>
     <span slot="rightWidget" class="kai-icon-arrow" style="margin:0px 5px;"></span>
   </Button>
-  <Button className="{navClass}" text="Sync Contact" onClick={syncContact}>
-    <span slot="leftWidget" class="kai-icon-arrow" style="margin:0px 5px;-moz-transform: scale(-1, 1);-webkit-transform: scale(-1, 1);-o-transform: scale(-1, 1);-ms-transform: scale(-1, 1);transform: scale(-1, 1);"></span>
-    <span slot="rightWidget" class="kai-icon-arrow" style="margin:0px 5px;"></span>
+  <Button className="{navClass}" text="Sync Local Contact" onClick={syncLocalContacts}>
+    <span slot="rightWidget" class="kai-icon-contacts" style="margin:0px 5px;"></span>
   </Button>
   <ListView className="{navClass}" title="{getAppProp().localization.langByLocale('change_locale', locale)}" subtitle="{getAppProp().localization.langByLocale('change_locale_subtitle', locale)}" onClick={changeLocale}/>
   <Separator title="Progress" />
