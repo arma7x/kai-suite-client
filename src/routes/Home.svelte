@@ -605,7 +605,7 @@
       var protocol = JSON.parse(event.data)
       var data = JSON.parse(protocol.data)
       // console.log(protocol.flag, data)
-      if (protocol.flag === 1) {
+      if (protocol.flag === 1) { // TxSyncContact
         // console.log(data)
         var filter = {
           filterBy: ['category'],
@@ -616,6 +616,13 @@
         navigator.mozContacts.find(filter)
         .then(contact => {
           if (contact.length === 0) {
+            if (data.metadata.sync_id != null || data.metadata.sync_updated != null || data.metadata.deleted) {
+              console.log( "Deleted KaiContact:", data.metadata)
+              const txd = { namespace: data.namespace, sync_id: data.metadata.sync_id, sync_updated: data.metadata.sync_updated }
+              const tx = { flag: 6, data: JSON.stringify(txd) }
+              ws.send(JSON.stringify(tx))
+              return;
+            }
             var kaicontact = new mozContact();
             kaicontact = updateContact(kaicontact, data);
             navigator.mozContacts.save(kaicontact)
@@ -640,8 +647,14 @@
             });
             console.log("Add to KaiContact:", data.namespace, kaicontact, data.person)
           } else {
-            if (data.metadata.hash != contact[0].key[0]) {
-              console.log(0, "Update KaiContact:", data.metadata, contact[0])
+            if (data.metadata.deleted) {
+              console.log(0, "Delete KaiContact:", data.metadata, contact[0])
+              navigator.mozContacts.remove(contact[0]);
+              const txd = { namespace: data.namespace, sync_id: data.metadata.sync_id, sync_updated: data.metadata.sync_updated }
+              const tx = { flag: 6, data: JSON.stringify(txd) }
+              ws.send(JSON.stringify(tx))
+            } else if (data.metadata.hash != contact[0].key[0]) {
+              console.log(1, "Update KaiContact:", data.metadata, contact[0])
               var kaicontact = updateContact(contact[0], data);
               navigator.mozContacts.save(kaicontact)
               .then(() => {
@@ -664,12 +677,12 @@
                 ws.send(JSON.stringify(tx))
               });
             } else if (contact[0].updated > new Date(data.metadata.sync_updated)) {
-              console.log(1, "Update KaiContact:", data.metadata, contact[0])
+              console.log(2, "Update KaiContact:", data.metadata, contact[0])
               const txd = { namespace: data.namespace, kai_contact: contact[0] }
               const tx = { flag: 4, data: JSON.stringify(txd) }
               ws.send(JSON.stringify(tx))
             } else {
-              console.log(2, "Update KaiContact:", data.metadata, contact[0])
+              console.log(3, "Update KaiContact:", data.metadata, contact[0])
               const txd = { namespace: data.namespace, sync_id: data.metadata.sync_id, sync_updated: data.metadata.sync_updated }
               const tx = { flag: 2, data: JSON.stringify(txd) }
               ws.send(JSON.stringify(tx))
@@ -682,6 +695,8 @@
           const tx = { flag: 2, data: JSON.stringify(txd) }
           ws.send(JSON.stringify(tx))
         });
+      } else if (protocol.flag === 1) { // TxDeleteContact
+
       }
     }
   }
