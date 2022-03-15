@@ -745,6 +745,9 @@
               }
               if (personsElapsed > 0) {
                 // iterate persons probally imported contact on desktop app
+                // add person into kaicontact
+                // delete old person & create new person
+                // mergedList
               } else {
                 syncPersons();
               }
@@ -776,6 +779,7 @@
           const metadata = data.metadata;
           const persons = data.persons;
           let syncList = []; // {kaicontact, metadata}
+          let mergedList = [];   // {kaicontact, metadata, person}
           let deleteList = []; // metadata
           let kaicontactsElapsed = Object.keys(kaicontacts).length;
           let personsElapsed = Object.keys(persons).length;
