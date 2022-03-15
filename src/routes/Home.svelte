@@ -700,7 +700,7 @@
       } else if (protocol.flag === 3) { // TxSyncLocalContact
         console.log("TxSyncLocalContact:", data.persons, data.metadata);
         getKaiContacts()
-        .then((contacts) => {
+        .then((kaicontacts) => {
           //  syncList		[]{kaicontact, metadata}
           //  deleteList	[]metadata
 
@@ -736,14 +736,14 @@
 
           function sync() {
             if (elapsed <= 0) {
-              console.log('Contacs:', Object.keys(contacts).length)
+              console.log('Contacs:', Object.keys(kaicontacts).length)
               const txd = {
                 sync_list: [
                   {
-                    kai_contact: contacts['0c36b78c43e94f1082d50eb0c0a4668e'],
+                    kai_contact: kaicontacts['0c36b78c43e94f1082d50eb0c0a4668e'],
                     metadata: {
-                      sync_id: contacts['0c36b78c43e94f1082d50eb0c0a4668e'].id,
-                      sync_updated: contacts['0c36b78c43e94f1082d50eb0c0a4668e'].updated,
+                      sync_id: kaicontacts['0c36b78c43e94f1082d50eb0c0a4668e'].id,
+                      sync_updated: kaicontacts['0c36b78c43e94f1082d50eb0c0a4668e'].updated,
                       hash: "hash"
                     }
                   }
@@ -755,9 +755,9 @@
             }
           }
 
-          let elapsed = Object.keys(contacts).length;
-          for (let c in contacts) {
-            console.log(c, contacts[c]);
+          let elapsed = Object.keys(kaicontacts).length;
+          for (let c in kaicontacts) {
+            console.log(c, kaicontacts[c]);
             elapsed--;
             sync();
           }
@@ -778,7 +778,7 @@
   }
 
   function getKaiContacts() {
-    let contacts = {};
+    let kaicontacts = {};
     return new Promise((resolve, reject) => {
       var cursor = navigator.mozContacts.getAll()
       cursor.onsuccess = function () {
@@ -796,11 +796,11 @@
               }
             }
             if (isLocal)
-              contacts[cursor.result.id] = cursor.result
+              kaicontacts[cursor.result.id] = cursor.result
             this.continue()
           }
         } else if (this.done) {
-          resolve(contacts);
+          resolve(kaicontacts);
         }
       }
       cursor.onerror = (err) => {
