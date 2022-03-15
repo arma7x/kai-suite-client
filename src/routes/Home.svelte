@@ -549,7 +549,6 @@
   });
 
   // Kai Suite
-  let contactsQueue = [];
   let conBtnLabel: string = 'Connect';
   let ws: any;
 
@@ -699,8 +698,73 @@
           ws.send(JSON.stringify(tx))
         });
       } else if (protocol.flag === 3) { // TxSyncLocalContact
-        console.log("TxSyncLocalContact:", data)
-        dequeueContact();
+        console.log("TxSyncLocalContact:", data.persons, data.metadata);
+        getKaiContacts()
+        .then((contacts) => {
+          //  syncList		[]{kaicontact, metadata}
+          //  deleteList	[]metadata
+
+          //  1. push all persons & metadata to kaios device
+          //  2. pull all kaicontacts from kaios & compare with 1.
+
+          //  3. Iterate kaicontacts
+          //  if metadata[kaicontact.key].deleted || (metadata[kaicontact.key] == null && kaicontact.key != null) {
+          //    delete: kaicontact
+          //    deleteList: metadata[kaicontact.key]
+          //  }
+          //  else if metadata[kaicontact.key] && metadata[kaicontact.key].deleted == false {
+          //    if metadata[kaicontact.key].sync_updated > kaios.updated {
+          //      update kaicontact, metadata[kaicontact.key].sync_updated = kaios.updated
+          //      syncList: kaicontact, metadata
+          //    } else if metadata[kaicontact.key].sync_updated < kaios.updated {
+          //      update metadata[kaicontact.key].sync_updated = kaios.updated
+          //      syncList: kaicontact, metadata
+          //    }
+          //  }
+          //  else if metadata[kaicontact.key] == null && kaicontact.key == null {
+          //    metadata[kaicontact.key].sync_id = kaicontact.key
+          //    metadata[kaicontact.key].sync_updated = kaios.updated
+          //    kaicontact.key = kaicontact.id
+          //    syncList: kaicontact, metadata
+          //}
+
+          //  4. Iterate metadata // noted. remove person
+          //  if kaicontact[metadata.sync_id] == null {
+          //    deleteList: metadata[metadata.sync_id]
+          //  }
+
+
+          function sync() {
+            if (elapsed <= 0) {
+              console.log('Contacs:', Object.keys(contacts).length)
+              const txd = {
+                sync_list: [
+                  {
+                    kai_contact: contacts['0c36b78c43e94f1082d50eb0c0a4668e'],
+                    metadata: {
+                      sync_id: contacts['0c36b78c43e94f1082d50eb0c0a4668e'].id,
+                      sync_updated: contacts['0c36b78c43e94f1082d50eb0c0a4668e'].updated,
+                      hash: "hash"
+                    }
+                  }
+                ],
+                delete_list: [{sync_updated: '2', sync_updated: '2', hash: "hash"}],
+              }
+              const tx = { flag: 8, data: JSON.stringify(txd) }
+              ws.send(JSON.stringify(tx))
+            }
+          }
+
+          let elapsed = Object.keys(contacts).length;
+          for (let c in contacts) {
+            console.log(c, contacts[c]);
+            elapsed--;
+            sync();
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        })
       }
     }
   }
@@ -713,43 +777,36 @@
     ws = null
   }
 
-  function syncLocalContacts() {
-    var cursor = navigator.mozContacts.getAll()
-    cursor.onsuccess = function () {
-      if (!this.done) {
-        if(cursor.result !== null) {
-          var isLocal = cursor.result.key == null;
-          if (cursor.result.category == null) {
-            isLocal = true;
-          } else {
-            for (var c in cursor.result.category) {
-              if (cursor.result.category[c].indexOf('local:') > -1) {
-                isLocal = true;
-                break;
+  function getKaiContacts() {
+    let contacts = {};
+    return new Promise((resolve, reject) => {
+      var cursor = navigator.mozContacts.getAll()
+      cursor.onsuccess = function () {
+        if (!this.done) {
+          if(cursor.result !== null) {
+            var isLocal = cursor.result.key == null;
+            if (cursor.result.category == null) {
+              isLocal = true;
+            } else {
+              for (var c in cursor.result.category) {
+                if (cursor.result.category[c].indexOf('local:') > -1) {
+                  isLocal = true;
+                  break;
+                }
               }
             }
+            if (isLocal)
+              contacts[cursor.result.id] = cursor.result
+            this.continue()
           }
-          if (isLocal)
-            contactsQueue.push(cursor.result)
-          this.continue()
+        } else if (this.done) {
+          resolve(contacts);
         }
-      } else if (this.done) {
-        console.log('Contacs:', contactsQueue.length)
-        dequeueContact();
       }
-    }
-    cursor.onerror = (err) => {
-      console.warn(`No file found: ${err.toString()}`);
-    }
-  }
-
-  function dequeueContact() {
-    if (ws != null && contactsQueue.length > 0) {
-      var contact = contactsQueue.pop();
-      const txd = { kai_contact: contact }
-      const tx = { flag: 8, data: JSON.stringify(txd) }
-      ws.send(JSON.stringify(tx))
-    }
+      cursor.onerror = (err) => {
+        reject(err)
+      }
+    });
   }
 
 </script>
@@ -758,9 +815,6 @@
   <ListView className="{navClass}" title="{getAppProp().localization.langByLocale('hello', locale, 'Svelte')}" subtitle="Goto room screen" onClick={() => onClickHandler('room')}/>
   <Button className="{navClass}" text="{conBtnLabel}" onClick={toggleConnection}>
     <span slot="rightWidget" class="kai-icon-arrow" style="margin:0px 5px;"></span>
-  </Button>
-  <Button className="{navClass}" text="Sync Local Contact" onClick={syncLocalContacts}>
-    <span slot="rightWidget" class="kai-icon-contacts" style="margin:0px 5px;"></span>
   </Button>
   <ListView className="{navClass}" title="{getAppProp().localization.langByLocale('change_locale', locale)}" subtitle="{getAppProp().localization.langByLocale('change_locale_subtitle', locale)}" onClick={changeLocale}/>
   <Separator title="Progress" />
