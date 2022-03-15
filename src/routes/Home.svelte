@@ -734,32 +734,90 @@
           //  }
 
 
-          function sync() {
-            if (elapsed <= 0) {
+          function syncKaicontacts() {
+            if (kaicontactsElapsed <= 0) {
               console.log('Contacs:', Object.keys(kaicontacts).length)
-              const txd = {
-                sync_list: [
-                  {
-                    kai_contact: kaicontacts['0c36b78c43e94f1082d50eb0c0a4668e'],
-                    metadata: {
-                      sync_id: kaicontacts['0c36b78c43e94f1082d50eb0c0a4668e'].id,
-                      sync_updated: kaicontacts['0c36b78c43e94f1082d50eb0c0a4668e'].updated,
-                      hash: "hash"
-                    }
-                  }
-                ],
-                delete_list: [{sync_updated: '2', sync_updated: '2', hash: "hash"}],
+              // if metadata not exist in kaicontacts, probably kaicontact was deleted
+              for (var id in metadata) {
+                if (kaicontacts[metadata[id].sync_id] == null) {
+                  deleteList.push(metadata[id]);
+                }
               }
-              const tx = { flag: 8, data: JSON.stringify(txd) }
-              ws.send(JSON.stringify(tx))
+              if (personsElapsed > 0) {
+                // iterate persons probally imported contact on desktop app
+              } else {
+                syncPersons();
+              }
             }
           }
 
-          let elapsed = Object.keys(kaicontacts).length;
-          for (let c in kaicontacts) {
-            console.log(c, kaicontacts[c]);
-            elapsed--;
-            sync();
+          function syncPersons() {
+            if (personsElapsed <= 0) {
+              console.log('syncList:', syncList);
+              console.log('deleteList:', deleteList);
+              //const txd = {
+                //sync_list: [
+                  //{
+                    //kai_contact: kaicontacts['0c36b78c43e94f1082d50eb0c0a4668e'],
+                    //metadata: {
+                      //sync_id: kaicontacts['0c36b78c43e94f1082d50eb0c0a4668e'].id,
+                      //sync_updated: kaicontacts['0c36b78c43e94f1082d50eb0c0a4668e'].updated,
+                      //hash: "hash"
+                    //}
+                  //}
+                //],
+                //delete_list: [{sync_id: '2', sync_updated: '2', hash: "hash"}],
+              //}
+              //const tx = { flag: 8, data: JSON.stringify(txd) }
+              //ws.send(JSON.stringify(tx))
+            }
+          }
+
+          const metadata = data.metadata;
+          const persons = data.persons;
+          let syncList = []; // {kaicontact, metadata}
+          let deleteList = []; // metadata
+          let kaicontactsElapsed = Object.keys(kaicontacts).length;
+          let personsElapsed = Object.keys(persons).length;
+
+          if (kaicontactsElapsed > 0) {
+            for (var kid in kaicontacts) {
+              const kaicontact = kaicontacts[kid];
+              if ((metadata[kaicontact.id] != null &&metadata[kaicontact.id].deleted) || (metadata[kaicontact.id] == null && kaicontact.key != null)) {
+                // delete: kaicontact
+                deleteList.push(metadata[kaicontact.id]);
+                kaicontactsElapsed--;
+                syncKaicontacts();
+              } else if (metadata[kaicontact.id] && metadata[kaicontact.id].deleted === false && persons[kid]) {
+                if (metadata[kaicontact.id].sync_updated > kaicontact.updated) {
+                  // update kaicontact then metadata[kaicontact.id].sync_updated = kaicontact.updated
+                  syncList.push({ kai_contact: kaicontact, metadata: metadata[kaicontact.id] });
+                  kaicontactsElapsed--;
+                  syncKaicontacts();
+                } else if (metadata[kaicontact.id].sync_updated < kaicontact.updated) {
+                  // // update person by kaicontact
+                  metadata[kaicontact.id].sync_updated = kaicontact.updated;
+                  syncList.push({ kai_contact: kaicontact, metadata: metadata[kaicontact.id] });
+                  kaicontactsElapsed--;
+                  syncKaicontacts();
+                } else {
+                  kaicontactsElapsed--;
+                  syncKaicontacts();
+                }
+              } else if (metadata[kaicontact.id] == null && kaicontact.key == null) {
+                const mt = { sync_id: kaicontact.id, sync_updated: kaicontact.updated, hash: "new" }
+                // update kaicontact.key = kaicontact.id
+                syncList.push({ kai_contact: kaicontact, metadata: mt });
+                kaicontactsElapsed--;
+                syncKaicontacts();
+              } else {
+                console.warn('TRACE', kaicontact);
+                kaicontactsElapsed--;
+                syncKaicontacts();
+              }
+            }
+          } else {
+            syncKaicontacts();
           }
         })
         .catch(err => {
