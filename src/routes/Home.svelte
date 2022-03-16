@@ -746,10 +746,10 @@
                     const mt = { sync_id: 'kaicontact.id', sync_updated: 'kaicontact.updated', hash: "merged", deleted: false }
                     mergedList.push({ person: persons[id], kai_contact: {}, metadata: mt });
                     personsElapsed--;
-                    syncLocalcontacts();
+                    syncPersons();
                   } else {
                     personsElapsed--;
-                    syncLocalcontacts();
+                    syncPersons();
                   }
                 }
               } else {
