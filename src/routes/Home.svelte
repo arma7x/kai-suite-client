@@ -739,9 +739,7 @@
               if (personsElapsed > 0) {
                 // iterate persons probally imported contact on desktop app
                 for (var id in persons) {
-                  const pid = persons[id].resourceName.split('/')[1];
-                  // console.log('pid', pid)
-                  if (kaicontacts[id] == null && metadata[pid].sync_id == null) {
+                  if (kaicontacts[id] == null && metadata[id].sync_id == null) {
                     // add person into kaicontact
                     // delete old person & create new person
                     // mergedList
