@@ -734,7 +734,7 @@
           //  }
 
 
-          function syncKaicontacts() {
+          function syncLocalcontacts() {
             if (kaicontactsElapsed <= 0) {
               if (personsElapsed > 0) {
                 // iterate persons probally imported contact on desktop app
@@ -743,13 +743,13 @@
                     // add person into kaicontact
                     // delete old person & create new person
                     // mergedList
-                    const mt = { sync_id: 'kaicontact.id', sync_updated: 'kaicontact.updated', hash: "merged" }
+                    const mt = { sync_id: 'kaicontact.id', sync_updated: 'kaicontact.updated', hash: "merged", deleted: false }
                     mergedList.push({ person: persons[id], kai_contact: {}, metadata: mt });
                     personsElapsed--;
-                    syncKaicontacts();
+                    syncLocalcontacts();
                   } else {
                     personsElapsed--;
-                    syncKaicontacts();
+                    syncLocalcontacts();
                   }
                 }
               } else {
@@ -770,12 +770,7 @@
               console.log('syncList:', syncList);
               console.log('deleteList:', deleteList);
               console.log('mergedList:', mergedList);
-              const txd = {
-                push_list: pushList,
-                sync_list: syncList,
-                merged_list: mergedList,
-                delete_list: deleteList,
-              }
+              const txd = { push_list: pushList, sync_list: syncList, merged_list: mergedList, delete_list: deleteList }
               const tx = { flag: 8, data: JSON.stringify(txd) }
               ws.send(JSON.stringify(tx))
             }
@@ -798,26 +793,60 @@
               const kaicontact = kaicontacts[kid];
               if ((metadata[kaicontact.id] != null &&metadata[kaicontact.id].deleted) || (metadata[kaicontact.id] == null && kaicontact.key != null)) {
                 // delete: kaicontact
-                deleteList.push(metadata[kaicontact.id]);
+                navigator.mozContacts.remove(kaicontact);
+                if (metadata[kaicontact.id] != null) {
+                  // delete: person
+                  deleteList.push(metadata[kaicontact.id]);
+                }
                 kaicontactsElapsed--;
-                syncKaicontacts();
-              } else if (metadata[kaicontact.id] && metadata[kaicontact.id].deleted === false && persons[kid]) {
-                if (metadata[kaicontact.id].sync_updated > kaicontact.updated) {
-                  // update kaicontact then metadata[kaicontact.id].sync_updated = kaicontact.updated
-                  syncList.push({ kai_contact: kaicontact, metadata: metadata[kaicontact.id] });
-                  kaicontactsElapsed--;
-                  syncKaicontacts();
-                } else if (metadata[kaicontact.id].sync_updated < kaicontact.updated) {
-                  // // update person by kaicontact
+                syncLocalcontacts();
+              } else if (metadata[kaicontact.id] && metadata[kaicontact.id].deleted === false && persons[kaicontact.id]) {
+                if (new Date(metadata[kaicontact.id].sync_updated) > kaicontact.updated) {
+                  console.log('person > kaicontact', kaicontact.id)
+                  // update kaicontact then metadata[kaicontact.id].sync_updated = updatedContact.updated
+                  const data = { person: persons[kaicontact.id], metadata: metadata[kaicontact.id], namespace: 'local:people:' + kaicontact.id }
+                  const updatedContact = updateContact(kaicontact, data)
+                  var filter = {
+                    filterBy: ['category'],
+                    filterValue: data.namespace,
+                    filterOp: 'equals',
+                    filterLimit: 1
+                  };
+                  navigator.mozContacts.save(updatedContact)
+                  .then(() => {
+                    return navigator.mozContacts.find(filter)
+                  })
+                  .then((result) => {
+                    if (result.length === 0) {
+                      kaicontactsElapsed--;
+                      syncLocalcontacts();
+                    } else {
+                      // update metadata[kaicontact.id].hash on desktop app
+                      metadata[kaicontact.id].sync_updated = result[0].updated;
+                      syncList.push({ kai_contact: result[0], metadata: metadata[kaicontact.id] });
+                      kaicontactsElapsed--;
+                      syncLocalcontacts();
+                    }
+                  })
+                  .catch((err) => {
+                    kaicontactsElapsed--;
+                    syncLocalcontacts();
+                  });
+                } else if (new Date(metadata[kaicontact.id].sync_updated) < kaicontact.updated) {
+                  console.log('kaicontact > person', kaicontact.id)
+                  // update person by kaicontact
+                  // update metadata[kaicontact.id].hash on desktop app
                   metadata[kaicontact.id].sync_updated = kaicontact.updated;
                   syncList.push({ kai_contact: kaicontact, metadata: metadata[kaicontact.id] });
                   kaicontactsElapsed--;
-                  syncKaicontacts();
+                  syncLocalcontacts();
                 } else {
+                  console.log('kaicontact === person', kaicontact.id)
                   kaicontactsElapsed--;
-                  syncKaicontacts();
+                  syncLocalcontacts();
                 }
               } else if (metadata[kaicontact.id] == null && kaicontact.key == null) {
+                // new kaicontact
                 var filter = {
                   filterBy: ['category'],
                   filterValue: 'local:people:' + kaicontact.id,
@@ -833,26 +862,26 @@
                 .then((result) => {
                   if (result.length === 0) {
                     kaicontactsElapsed--;
-                    syncKaicontacts();
+                    syncLocalcontacts();
                   } else {
                     const mt = { sync_id: kaicontact.id, sync_updated: kaicontact.updated, hash: "new" }
                     pushList.push({ kai_contact: result[0], metadata: mt });
                     kaicontactsElapsed--;
-                    syncKaicontacts();
+                    syncLocalcontacts();
                   }
                 })
                 .catch((err) => {
                   kaicontactsElapsed--;
-                  syncKaicontacts();
+                  syncLocalcontacts();
                 });
               } else {
                 console.warn('TRACE', kaicontact);
                 kaicontactsElapsed--;
-                syncKaicontacts();
+                syncLocalcontacts();
               }
             }
           } else {
-            syncKaicontacts();
+            syncLocalcontacts();
           }
         })
         .catch(err => {
