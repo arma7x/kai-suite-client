@@ -605,8 +605,13 @@
     }
     ws.onmessage = (event) => {
       var protocol = JSON.parse(event.data)
-      var data = JSON.parse(protocol.data)
-      // console.log(protocol.flag, data)
+      var data;
+      try {
+        data = JSON.parse(protocol.data)
+      } catch (e) {
+        data = protocol.data
+      }
+      console.log(protocol.flag, data)
       if (protocol.flag === 1) { // TxSyncContact
         // console.log(data)
         var filter = {
@@ -701,38 +706,6 @@
         console.log("TxSyncLocalContact:", data.persons, data.metadata);
         getKaiContacts()
         .then((kaicontacts) => {
-          //  syncList		[]{kaicontact, metadata}
-          //  deleteList	[]metadata
-
-          //  1. push all persons & metadata to kaios device
-          //  2. pull all kaicontacts from kaios & compare with 1.
-
-          //  3. Iterate kaicontacts
-          //  if metadata[kaicontact.key].deleted || (metadata[kaicontact.key] == null && kaicontact.key != null) {
-          //    delete: kaicontact
-          //    deleteList: metadata[kaicontact.key]
-          //  }
-          //  else if metadata[kaicontact.key] && metadata[kaicontact.key].deleted == false {
-          //    if metadata[kaicontact.key].sync_updated > kaios.updated {
-          //      update kaicontact, metadata[kaicontact.key].sync_updated = kaios.updated
-          //      syncList: kaicontact, metadata
-          //    } else if metadata[kaicontact.key].sync_updated < kaios.updated {
-          //      update metadata[kaicontact.key].sync_updated = kaios.updated
-          //      syncList: kaicontact, metadata
-          //    }
-          //  }
-          //  else if metadata[kaicontact.key] == null && kaicontact.key == null {
-          //    metadata[kaicontact.key].sync_id = kaicontact.key
-          //    metadata[kaicontact.key].sync_updated = kaios.updated
-          //    kaicontact.key = kaicontact.id
-          //    syncList: kaicontact, metadata
-          //}
-
-          //  4. Iterate metadata // noted. remove person
-          //  if kaicontact[metadata.sync_id] == null {
-          //    deleteList: metadata[metadata.sync_id]
-          //  }
-
 
           function syncLocalcontacts() {
             if (kaicontactsElapsed <= 0) {
@@ -887,6 +860,17 @@
         .catch(err => {
           console.log(err)
         })
+      } else if (protocol.flag === 5) {
+        console.log("TxSyncSMS:", data);
+        getSMS()
+        .then(result => {
+          console.log(result)
+          const tx = { flag: 10, data: JSON.stringify(result) }
+          ws.send(JSON.stringify(tx))
+        })
+        .catch(err => {
+          console.log(err)
+        })
       }
     }
   }
@@ -929,6 +913,52 @@
         reject(err)
       }
     });
+  }
+
+  function clone(obj) {
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = {};
+    for (var attr in obj) {
+      copy[attr] = obj[attr];
+    }
+    return copy;
+  }
+
+  function getSMS() {
+    return new Promise((resolve, reject) => {
+      var threads = {}
+      var messages = {}
+      var cursorThread = navigator.mozMobileMessage.getThreads()
+      cursorThread.onsuccess = function () {
+        if (!cursorThread.done) {
+          if(cursorThread.result !== null) {
+            threads[cursorThread.result.id] = clone(cursorThread.result)
+            messages[cursorThread.result.id] = {}
+            var cursorMessage = navigator.mozMobileMessage.getMessages({ threadId: cursorThread.result.id }, false)
+            cursorMessage.onsuccess = function () {
+              if (!cursorMessage.done) {
+                if(cursorMessage.result !== null) {
+                  messages[cursorThread.result.id][cursorMessage.result.id] = clone(cursorMessage.result)
+                  cursorMessage.continue()
+                }
+              } else if (cursorMessage.done) {
+                cursorThread.continue()
+              }
+            }
+            cursorMessage.onerror = (err) => {
+              console.log(err)
+              cursorThread.continue()
+            }
+          }
+        } else if (cursorThread.done) {
+          resolve({threads, messages})
+        }
+      }
+      cursorThread.onerror = (err) => {
+        console.log(err)
+        reject(reject)
+      }
+    })
   }
 
 </script>
