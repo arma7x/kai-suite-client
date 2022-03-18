@@ -930,6 +930,7 @@
       })
     }
   }
+
   function getSMS() {
     return new Promise((resolve, reject) => {
       var threads = {}
@@ -966,6 +967,16 @@
       }
     })
   }
+
+  navigator.mozSetMessageHandler('sms-received', function(sms) { 
+    console.log('sms-received')
+    syncSMS() 
+  })
+
+  navigator.mozSetMessageHandler('sms-sent', function(sms) { 
+    console.log('sms-sent')
+    syncSMS() 
+  })
 
 </script>
 

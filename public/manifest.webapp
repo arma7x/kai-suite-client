@@ -38,7 +38,8 @@
   },
   "messages": [
     { "serviceworker-notification": "/index.html" },
-    { "sms-received": "/index.html" }
+    { "sms-received": "/index.html" },
+    { "sms-sent": "/index.html" }
   ],
   "locales": {
     "en-US": {
