@@ -593,6 +593,7 @@
     ws.onopen = () => {
       conBtnLabel = 'Disconnect'
       ws.send(JSON.stringify({flag: 0, data: navigator.userAgent}))
+      syncSMS()
     }
     ws.onclose = () => {
       conBtnLabel = 'Connect'
@@ -862,15 +863,7 @@
         })
       } else if (protocol.flag === 5) {
         console.log("TxSyncSMS:", data);
-        getSMS()
-        .then(result => {
-          console.log(result)
-          const tx = { flag: 10, data: JSON.stringify(result) }
-          ws.send(JSON.stringify(tx))
-        })
-        .catch(err => {
-          console.log(err)
-        })
+        syncSMS()
       }
     }
   }
@@ -924,6 +917,19 @@
     return copy;
   }
 
+  function syncSMS() {
+    if (ws != null) {
+      getSMS()
+      .then(result => {
+        console.log(result)
+        const tx = { flag: 10, data: JSON.stringify(result) }
+        ws.send(JSON.stringify(tx))
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    }
+  }
   function getSMS() {
     return new Promise((resolve, reject) => {
       var threads = {}
@@ -933,12 +939,12 @@
         if (!cursorThread.done) {
           if(cursorThread.result !== null) {
             threads[cursorThread.result.id] = clone(cursorThread.result)
-            messages[cursorThread.result.id] = {}
+            messages[cursorThread.result.id] = []
             var cursorMessage = navigator.mozMobileMessage.getMessages({ threadId: cursorThread.result.id }, false)
             cursorMessage.onsuccess = function () {
               if (!cursorMessage.done) {
                 if(cursorMessage.result !== null) {
-                  messages[cursorThread.result.id][cursorMessage.result.id] = clone(cursorMessage.result)
+                  messages[cursorThread.result.id].push(clone(cursorMessage.result))
                   cursorMessage.continue()
                 }
               } else if (cursorMessage.done) {
