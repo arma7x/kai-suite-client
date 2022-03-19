@@ -32,6 +32,11 @@
       "access": "readwrite",
       "description": "Manage KaiOS contact list"
     },
+    "settings": {
+      "access": "readonly"
+    },
+    "mobileconnection": {},
+    "telephony": {},
     "desktop-notification": {
       "description": "Required for display notification"
     }
