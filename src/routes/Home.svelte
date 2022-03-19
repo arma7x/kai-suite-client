@@ -612,9 +612,8 @@
       } catch (e) {
         data = protocol.data
       }
-      console.log(protocol.flag, data)
-      if (protocol.flag === 1) { // TxSyncContact
-        // console.log(data)
+      console.log("Flag:", protocol.flag)
+      if (protocol.flag === 1) { // TxSyncGoogleContact
         var filter = {
           filterBy: ['category'],
           filterValue: data.namespace,
@@ -703,7 +702,9 @@
           const tx = { flag: 2, data: JSON.stringify(txd) }
           ws.send(JSON.stringify(tx))
         });
-      } else if (protocol.flag === 3) { // TxSyncLocalContact
+      } else if (protocol.flag === 3) { // TxRestoreGoogleContact3
+        console.log("TxRestoreGoogleContact:", data)
+      } else if (protocol.flag === 5) { // TxSyncLocalContact5
         console.log("TxSyncLocalContact:", data.persons, data.metadata);
         getKaiContacts()
         .then((kaicontacts) => {
@@ -861,9 +862,20 @@
         .catch(err => {
           console.log(err)
         })
-      } else if (protocol.flag === 5) {
+      } else if (protocol.flag === 7) { // TxRestoreLocalContact7
+        console.log("TxRestoreLocalContacts:", data)
+      } else if (protocol.flag === 9) { // TxSyncSMS9
         console.log("TxSyncSMS:", data);
         syncSMS()
+      } else if (protocol.flag === 11) { // TxSendSMS11
+        console.log("TxSendSMS:", data);
+        const req = navigator.mozMobileMessage.send(data.receivers[0], data.message)
+        req.onsuccess = function(result) {
+          console.log(result)
+        }
+        req.onerror = function(err) {
+          console.log(err.target.error)
+        }
       }
     }
   }
