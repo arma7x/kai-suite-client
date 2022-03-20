@@ -25,6 +25,9 @@
   "origin": "app://kai-suite.arma7x.com",
   "type": "certified",
   "permissions": {
+    "systemXHR": {
+      "description": "Required to load remote content"
+    },
     "sms": {
       "description": "WebSMS permission"
     },
