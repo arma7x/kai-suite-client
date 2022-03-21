@@ -698,7 +698,7 @@
               const tx = { flag: 4, data: JSON.stringify(txd) }
               ws.send(JSON.stringify(tx))
             } else {
-              console.log(3, "Update KaiContact:", data.metadata, contact[0])
+              // console.log(3, "Update KaiContact:", data.metadata, contact[0])
               const txd = { namespace: data.namespace, sync_id: data.metadata.sync_id, sync_updated: data.metadata.sync_updated }
               const tx = { flag: 2, data: JSON.stringify(txd) }
               ws.send(JSON.stringify(tx))
@@ -713,6 +713,51 @@
         });
       } else if (protocol.flag === 3) { // TxRestoreGoogleContact3
         console.log("TxRestoreGoogleContact:", data)
+        var filter = {
+          filterBy: ['category'],
+          filterValue: data.namespace,
+          filterOp: 'equals',
+          filterLimit: 1
+        };
+        navigator.mozContacts.find(filter)
+        .then(contact => {
+          if (contact.length === 0) {
+            var kaicontact = new mozContact();
+            kaicontact = updateContact(kaicontact, data);
+            navigator.mozContacts.save(kaicontact)
+            .then(() => {
+              return navigator.mozContacts.find(filter)
+            })
+            .then((result) => {
+              if (result.length === 0) {
+                const txd = { namespace: data.namespace, sync_id: "error", sync_updated: "Added KaiContact but not found by category" }
+                const tx = { flag: 12, data: JSON.stringify(txd) }
+                ws.send(JSON.stringify(tx))
+              } else {
+                const txd = { namespace: data.namespace, sync_id: result[0].id, sync_updated: result[0].updated }
+                const tx = { flag: 12, data: JSON.stringify(txd) }
+                ws.send(JSON.stringify(tx))
+              }
+            })
+            .catch((err) => {
+              const txd = { namespace: data.namespace, sync_id: "error", sync_updated: err.toString() }
+              const tx = { flag: 2, data: JSON.stringify(txd) }
+              ws.send(JSON.stringify(tx))
+            });
+            console.log("Restore KaiContact:", data.namespace, kaicontact, data.person)
+          } else {
+            console.log("Skip Restore KaiContact:", data.namespace)
+            const txd = { namespace: data.namespace, sync_id: "error", sync_updated: "skip" }
+            const tx = { flag: 12, data: JSON.stringify(txd) }
+            ws.send(JSON.stringify(tx))
+          }
+        })
+        .catch((err) => {
+          console.log("Error Restore KaiContact:", data.namespace, err)
+          const txd = { namespace: data.namespace, sync_id: "error", sync_updated: err.toString() }
+          const tx = { flag: 12, data: JSON.stringify(txd) }
+          ws.send(JSON.stringify(tx))
+        });
       } else if (protocol.flag === 5) { // TxSyncLocalContact5
         console.log("TxSyncLocalContact:", data.persons, data.metadata);
         getKaiContacts()
