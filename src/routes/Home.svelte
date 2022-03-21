@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Route, navigate as goto } from "svelte-navigator";
   import { createKaiNavigator } from '../utils/navigation';
-  import { Dialog, OptionMenu, SingleSelector, MultiSelector, ListView, Separator, Radio, Checkbox, LoadingBar, LinearProgress, RangeSlider, Button, TextInputField, TextAreaField, TextInputDialog, TextAreaDialog, Radio, Checkbox, DatePicker, TimePicker, Toast, Toaster, SoftwareKey } from '../components';
+  import { Dialog, OptionMenu, ListView, Separator, Button, TextInputField, Toast, Toaster, SoftwareKey } from '../components';
   import { onMount, onDestroy } from 'svelte';
   import uaparser from 'ua-parser-js';
 
@@ -12,34 +12,11 @@
   export let getAppProp: Function;
 
   let name: string = 'Home';
+  let ipAddress: string = '192.168.43.33';
+  let port: string = '4444';
   let dialog: Dialog;
-  let optionMenu: OptionMenu;
-  let optionMenuIndex:number = 0;
-  let singleSelector: SingleSelector;
-  let singleSelectorOptions:any = [
-    { title: 'Single Selector 0', subtitle: 'Single selector 0 subtitle', selected: true },
-    { title: 'Single Selector 1', subtitle: 'Single selector 1 subtitle', selected: false },
-    { title: 'Single Selector 2', subtitle: 'Single selector 2 subtitle', selected: false },
-    { title: 'Single Selector 3', subtitle: 'Single selector 3 subtitle', selected: false },
-    { title: 'Single Selector 4', subtitle: 'Single selector 4 subtitle', selected: false },
-  ];
-  let multiSelector: MultiSelector;
-  let multiSelectorOptions:any = [
-    { title: 'Multi Selector 0', subtitle: 'Multi selector 0 subtitle', checked: true },
-    { title: 'Multi Selector 1', subtitle: 'Multi selector 1 subtitle', checked: false },
-    { title: 'Multi Selector 2', subtitle: 'Multi selector 2 subtitle', checked: false },
-    { title: 'Multi Selector 3', subtitle: 'Multi selector 3 subtitle', checked: false },
-    { title: 'Multi Selector 4', subtitle: 'Multi selector 4 subtitle', checked: false },
-  ];
-  let loadingBar: LoadingBar;
   let inputSoftwareKey: SoftwareKey;
-  let datePicker: DatePicker;
-  let datePickerValue: Date = new Date(1582227193963);
-  let timePicker: DatePicker;
-  let textInputDialog: TextInputDialog;
-  let textAreaDialog: TextAreaDialog;
-  let progressValue: number = 0;
-  let sliderValue: number = 20;
+  
   let locales:any = [
     { title: 'English - United State', subtitle: 'en-US' },
     { title: 'Japanese', subtitle: 'jp-JP' },
@@ -108,10 +85,6 @@
 
   let navInstance = createKaiNavigator(navOptions);
 
-  function onClickHandler(value) {
-    goto(value);
-  }
-
   function toastMessage(text = 'I\'m out after 2 second') {
     const t = new Toast({
       target: document.body,
@@ -129,24 +102,6 @@
         }, 4000);
       }
     })
-  }
-
-  function showLoadingBar() {
-    loadingBar = new LoadingBar({
-      target: document.body,
-      props: {
-        onOpened: () => {
-          navInstance.detachListener();
-          setTimeout(() => {
-            loadingBar.$destroy();
-          }, 3000);
-        },
-        onClosed: () => {
-          navInstance.attachListener();
-          loadingBar = null;
-        }
-      }
-    });
   }
 
   function openDialog() {
@@ -183,285 +138,12 @@
     });
   }
 
-  function openOptionMenu() {
-    optionMenu = new OptionMenu({
-      target: document.body,
-      props: {
-        title: 'Option Menu',
-        focusIndex: optionMenuIndex,
-        options: [
-          { title: 'Option Menu 0', subtitle: 'Option menu 0 subtitle' },
-          { title: 'Option Menu 1', subtitle: 'Option menu 1 subtitle' },
-          { title: 'Option Menu 2', subtitle: 'Option menu 2 subtitle' },
-          { title: 'Option Menu 3', subtitle: 'Option menu 3 subtitle' },
-          { title: 'Option Menu 4', subtitle: 'Option menu 4 subtitle' },
-        ],
-        softKeyCenterText: 'select',
-        onSoftkeyRight: (evt, scope) => {
-          console.log('onSoftkeyRight', scope);
-        },
-        onSoftkeyLeft: (evt, scope) => {
-          console.log('onSoftkeyRight', scope);
-        },
-        onEnter: (evt, scope) => {
-          console.log('onEnter', scope);
-          optionMenuIndex = scope.index;
-          optionMenu.$destroy();
-        },
-        onBackspace: (evt, scope) => {
-          console.log('onBackspace', scope);
-          evt.preventDefault();
-          evt.stopPropagation();
-          optionMenu.$destroy();
-        },
-        onOpened: () => {
-          navInstance.detachListener();
-        },
-        onClosed: (scope) => {
-          console.log(scope);
-          navInstance.attachListener();
-          optionMenu = null;
-        }
-      }
-    });
-  }
-
-  function openSingleSelector() {
-    const idx = singleSelectorOptions.findIndex((o) => {
-      return o.selected;
-    })
-    singleSelector = new SingleSelector({
-      target: document.body,
-      props: {
-        title: 'Single Selector',
-        focusIndex: idx,
-        options: singleSelectorOptions,
-        softKeyCenterText: 'select',
-        onEnter: (evt, scope) => {
-          console.log('onEnter', scope);
-          singleSelectorOptions = scope.options;
-          evt.preventDefault();
-          evt.stopPropagation();
-          singleSelector.$destroy();
-        },
-        onBackspace: (evt, scope) => {
-          console.log('onBackspace', scope);
-          evt.preventDefault();
-          evt.stopPropagation();
-          singleSelector.$destroy();
-        },
-        onOpened: () => {
-          navInstance.detachListener();
-        },
-        onClosed: (scope) => {
-          console.log(scope);
-          navInstance.attachListener();
-          singleSelector = null;
-        }
-      }
-    });
-  }
-
-  function openMultiSelector() {
-    multiSelector = new MultiSelector({
-      target: document.body,
-      props: {
-        title: 'Multi Selector',
-        focusIndex: optionMenuIndex,
-        options: JSON.parse(JSON.stringify(multiSelectorOptions)),
-        softKeyLeftText: 'Cancel',
-        softKeyRightText: 'Done',
-        softKeyCenterTextSelect: 'select',
-        softKeyCenterTextDeselect: 'deselect',
-        onSoftkeyLeft: (evt, scope) => {
-          console.log('onSoftkeyLeft', scope);
-          evt.preventDefault();
-          evt.stopPropagation();
-          multiSelector.$destroy();
-        },
-        onSoftkeyRight: (evt, scope) => {
-          console.log('onSoftkeyRight', scope);
-          multiSelectorOptions = scope.options;
-          evt.preventDefault();
-          evt.stopPropagation();
-          multiSelector.$destroy();
-        },
-        onBackspace: (evt, scope) => {
-          console.log('onBackspace', scope);
-          evt.preventDefault();
-          evt.stopPropagation();
-          multiSelector.$destroy();
-        },
-        onOpened: () => {
-          navInstance.detachListener();
-        },
-        onClosed: (scope) => {
-          console.log(scope);
-          navInstance.attachListener();
-          multiSelector = null;
-        }
-      }
-    });
-  }
-
-  function openDatePicker() {
-    datePicker = new DatePicker({
-      target: document.body,
-      props: {
-        title: 'Date Picker',
-        date: datePickerValue,
-        softKeyLeftText: 'Cancel',
-        softKeyCenterText: 'save',
-        onSoftkeyLeft: (evt, date) => {
-          console.log('onSoftkeyLeft', date);
-          datePicker.$destroy();
-        },
-        onSoftkeyRight: (evt, date) => {
-          console.log('onSoftkeyRight', date);
-        },
-        onEnter: (evt, date) => {
-          console.log('onEnter', date);
-          datePickerValue = date;
-          datePicker.$destroy();
-        },
-        onBackspace: (evt, date) => {
-          console.log('onBackspace', date);
-          evt.preventDefault();
-          evt.stopPropagation();
-          datePicker.$destroy();
-        },
-        onOpened: () => {
-          navInstance.detachListener();
-        },
-        onClosed: (date) => {
-          console.log('onClosed', date);
-          navInstance.attachListener();
-          datePicker = null;
-        }
-      }
-    });
-  }
-
-  function openTimePicker() {
-    timePicker = new TimePicker({
-      target: document.body,
-      props: {
-        title: 'Time Picker',
-        date: datePickerValue,
-        is12HourSystem: true,
-        softKeyLeftText: 'Cancel',
-        softKeyCenterText: 'save',
-        onSoftkeyLeft: (evt, date) => {
-          console.log('onSoftkeyLeft', date);
-          timePicker.$destroy();
-        },
-        onSoftkeyRight: (evt, date) => {
-          console.log('onSoftkeyRight', date);
-        },
-        onEnter: (evt, date) => {
-          console.log('onEnter', date);
-          datePickerValue = date;
-          timePicker.$destroy();
-        },
-        onBackspace: (evt, date) => {
-          console.log('onBackspace', date);
-          evt.preventDefault();
-          evt.stopPropagation();
-          timePicker.$destroy();
-        },
-        onOpened: () => {
-          navInstance.detachListener();
-        },
-        onClosed: (date) => {
-          console.log('onClosed', date);
-          navInstance.attachListener();
-          timePicker = null;
-        }
-      }
-    });
-  }
-
-  function openTextInputDialog() {
-    textInputDialog = new TextInputDialog({
-      target: document.body,
-      props: {
-        title: 'TextInputDialog',
-        softKeyCenterText: 'ok',
-        value: 'Value',
-        placeholder: 'Placeholder',
-        type: 'text',
-        onSoftkeyLeft: (evt, value) => {
-          console.log('onSoftkeyLeft', value);
-        },
-        onSoftkeyRight: (evt, value) => {
-          console.log('onSoftkeyRight', value);
-        },
-        onEnter: (evt, value) => {
-          console.log('onEnter', value);
-          textInputDialog.$destroy();
-        },
-        onBackspace: (evt, value) => {
-          console.log('onBackspace', value);
-          evt.stopPropagation();
-        },
-        onOpened: () => {
-          navInstance.detachListener();
-        },
-        onClosed: (value) => {
-          console.log('onClosed', value)
-          navInstance.attachListener();
-          textInputDialog = null;
-        }
-      }
-    });
-  }
-
-  function openTextAreaDialog() {
-    textAreaDialog = new TextAreaDialog({
-      target: document.body,
-      props: {
-        title: 'TextAreaDialog',
-        softKeyCenterText: 'ok',
-        value: 'Value',
-        placeholder: 'Placeholder',
-        type: 'text',
-        rows: 3,
-        onSoftkeyLeft: (evt, value) => {
-          console.log('onSoftkeyLeft', value);
-        },
-        onSoftkeyRight: (evt, value) => {
-          console.log('onSoftkeyRight', value);
-        },
-        onEnter: (evt, value) => {
-          console.log('onEnter', value);
-          textAreaDialog.$destroy();
-        },
-        onBackspace: (evt, value) => {
-          console.log('onBackspace', value);
-          evt.stopPropagation();
-        },
-        onOpened: () => {
-          navInstance.detachListener();
-        },
-        onClosed: (value) => {
-          console.log('onClosed', value)
-          navInstance.attachListener();
-          textAreaDialog = null;
-        }
-      }
-    });
-  }
-
-  function onButtonClick(evt) {
+  function onButtonExit(evt) {
     window.close();
   }
 
-  function onInput(evt) {
-    console.log('onInput');
-  }
-
-  function onFocus(evt) {
-    console.log('onFocus');
+  function onFocusIp(evt) {
+    console.log('onFocus onFocusIp');
     inputSoftwareKey = new SoftwareKey({
       target: document.body,
       props: {
@@ -473,23 +155,43 @@
     });
   }
 
-  function onBlur(evt) {
-    console.log('onBlur');
+  function onBlurIp(evt) {
+    console.log('onBlur onBlurIp');
     if (inputSoftwareKey) {
       inputSoftwareKey.$destroy();
       inputSoftwareKey = null;
     }
   }
 
-  function propagateClick(evt) {
-    const keys = Object.keys(evt.target.children);
-    for (var k in keys) {
-      evt.target.children[k].click();
+  function onInputIp(evt) {
+    console.log('onInput onInputIp', evt.target.value);
+    ipAddress = evt.target.value.toString();
+  }
+
+  function onFocusPort(evt) {
+    console.log('onFocus onFocusPort');
+    inputSoftwareKey = new SoftwareKey({
+      target: document.body,
+      props: {
+        isInvert: true,
+        leftText: 'X Dialog',
+        centerText: 'X Enter',
+        rightText: 'X Toast'
+      }
+    });
+  }
+
+  function onBlurPort(evt) {
+    console.log('onBlur onBlurPort');
+    if (inputSoftwareKey) {
+      inputSoftwareKey.$destroy();
+      inputSoftwareKey = null;
     }
   }
 
-  function onRadioCheckboxChange(scope) {
-    console.log(scope);
+  function onInputPort(evt) {
+    console.log('onInput onInputPort', evt.target.value);
+    port = evt.target.value.toString();
   }
 
   function changeLocale() {
@@ -588,9 +290,10 @@
   }
 
   function connectWsServer() {
+    console.log(`ws://${ipAddress}:${port}/`)
     if (ws != null)
       return
-    ws = new WebSocket('ws://192.168.43.33:4444/')
+    ws = new WebSocket(`ws://${ipAddress}:${port}/`)
     ws.onopen = () => {
       conBtnLabel = 'Disconnect'
       const ua = uaparser(navigator.userAgent)
@@ -1306,64 +1009,25 @@
     return content2;
   }
 
-  navigator.mozSetMessageHandler('sms-received', function(sms) { 
-    // console.log('sms-received')
+  navigator.mozSetMessageHandler('sms-received', function(sms) {
     syncSMS() 
   })
 
-  navigator.mozSetMessageHandler('sms-sent', function(sms) { 
-    // console.log('sms-sent')
+  navigator.mozSetMessageHandler('sms-sent', function(sms) {
     syncSMS() 
   })
 
 </script>
 
 <main id="home-screen" data-pad-top="28" data-pad-bottom="30">
-  <ListView className="{navClass}" title="{getAppProp().localization.langByLocale('hello', locale, 'Svelte')}" subtitle="Goto room screen" onClick={() => onClickHandler('room')}/>
+  <Separator title="Configuration" />
+  <TextInputField className="{navClass}" label="Ip Address" placeholder="Placeholder" value="{ipAddress}" type="text" onInput="{onInputIp}" onFocus="{onFocusIp}" onBlur="{onBlurIp}" />
+  <TextInputField className="{navClass}" label="Port" placeholder="Placeholder" value="{port}" type="tel" onInput="{onInputPort}" onFocus="{onFocusPort}" onBlur="{onBlurPort}" />
   <Button className="{navClass}" text="{conBtnLabel}" onClick={toggleConnection}>
     <span slot="rightWidget" class="kai-icon-arrow" style="margin:0px 5px;"></span>
   </Button>
   <ListView className="{navClass}" title="{getAppProp().localization.langByLocale('change_locale', locale)}" subtitle="{getAppProp().localization.langByLocale('change_locale_subtitle', locale)}" onClick={changeLocale}/>
-  <Separator title="Progress" />
-  <ListView className="{navClass}" title="Loading Bar" subtitle="Display loading bar & freeze keydown for 3 seconds" onClick={showLoadingBar} />
-  <ListView key="linear-progress" className="{navClass}">
-    <slot>
-      <LinearProgress label="Linear Progress" value={progressValue} min={0} max={100} progressType={1}/>
-    </slot>
-    <span slot="rightWidget"></span>
-  </ListView>
-  <ListView key="range-slider" className="{navClass}">
-    <slot>
-      <RangeSlider label="Range Slider" value={sliderValue} min={0} max={100} progressType={2}/>
-    </slot>
-    <span slot="rightWidget"></span>
-  </ListView>
-  <Separator title="Dialog" />
-  <ListView className="{navClass}" title="Option Menu" subtitle="Click to open option menu & focus on index {optionMenuIndex}" onClick={openOptionMenu}/>
-  <ListView className="{navClass}" title="Single Selector" subtitle="Click to open single selector & focus on current" onClick={openSingleSelector}/>
-  <ListView className="{navClass}" title="Multi Selector" subtitle="Click to open multi selector & focus on index {optionMenuIndex}" onClick={openMultiSelector}/>
-  <Separator title="Input" />
-  <TextInputField className="{navClass}" label="TextInput" placeholder="Placeholder" value="Value" type="text" {onInput} {onFocus} {onBlur} />
-  <TextAreaField className="{navClass}" label="TextArea" placeholder="Placeholder" value="Value" type="text" rows={4} {onInput} {onFocus} {onBlur}/>
-  <ListView className="{navClass}" title="Checkbox" subtitle="Please click me" onClick={propagateClick}>
-    <Checkbox slot="rightWidget" key="checkbox" checked="{true}" onChange={onRadioCheckboxChange} />
-  </ListView>
-  <ListView className="{navClass}" title="Radio" subtitle="Please click me" onClick={propagateClick}>
-    <Radio slot="rightWidget" key="radio" selected="{true}" onChange={onRadioCheckboxChange} />
-  </ListView>
-  <ListView className="{navClass}" title="Date Picker" subtitle="Click to open date picker, {datePickerValue.toDateString()}" onClick={openDatePicker}>
-    <span slot="rightWidget" class="kai-icon-calendar" style="font-size:20px;"></span>
-  </ListView>
-  <ListView className="{navClass}" title="Time Picker" subtitle="Click to open time picker, {datePickerValue.toLocaleTimeString()}" onClick={openTimePicker}>
-    <span slot="rightWidget" class="kai-icon-favorite-on" style="font-size:20px;"></span>
-  </ListView>
-  <ListView className="{navClass}" title="Text Input Dialog" subtitle="Open text input dialog" onClick={openTextInputDialog}>
-    <span slot="rightWidget" class="kai-icon-search" style="font-size:20px;"></span>
-  </ListView>
-  <ListView className="{navClass}" title="Text Area Dialog" subtitle="Open text area dialog" onClick={openTextAreaDialog}>
-    <span slot="rightWidget" class="kai-icon-message" style="font-size:20px;"></span>
-  </ListView>
-  <Button className="{navClass}" text="Exit" onClick={onButtonClick}>
+  <Button className="{navClass}" text="Exit" onClick={onButtonExit}>
     <span slot="leftWidget" class="kai-icon-arrow" style="margin:0px 5px;-moz-transform: scale(-1, 1);-webkit-transform: scale(-1, 1);-o-transform: scale(-1, 1);-ms-transform: scale(-1, 1);transform: scale(-1, 1);"></span>
     <span slot="rightWidget" class="kai-icon-arrow" style="margin:0px 5px;"></span>
   </Button>
