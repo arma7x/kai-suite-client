@@ -469,14 +469,18 @@
           function syncLocalcontacts() {
             if (kaicontactsElapsed <= 0) {
               if (personsElapsed > 0) {
+                // PLEASE USE RESTORE TO SYNC IMPORTED CONTACT FROM VCF
                 // iterate persons probally imported contact on desktop app
                 for (var id in persons) {
-                  if (kaicontacts[id] == null && metadata[id].sync_id == null) {
-                    // add person into kaicontact
-                    // delete old person & create new person
-                    // mergedList
-                    const mt = { sync_id: 'kaicontact.id', sync_updated: 'kaicontact.updated', hash: "merged", deleted: false }
-                    mergedList.push({ person: persons[id], kai_contact: {}, metadata: mt });
+                  if (kaicontacts[id] == null && metadata[id] != null) {
+                    //var kaicontact = new mozContact();
+                    //metadata[id].hash = id;
+                    //const param = { person: persons[id], metadata: metadata[id], namespace: 'local:people:' + id }
+                    //const addContact = updateContact(kaicontact, param);
+                    //navigator.mozContacts.save(addContact);
+                    //// console.log(persons[id], metadata[id]);
+                    //// mergedList.push({ person: persons[p], kai_contact: kaicontact, metadata: metadata });
+                    //kaicontacts[id] = true;
                     personsElapsed--;
                     syncPersons();
                   } else {
@@ -488,6 +492,7 @@
                 syncPersons();
               }
             }
+            syncPersons();
           }
 
           function syncPersons() {
@@ -495,7 +500,7 @@
               // if metadata not exist in kaicontacts, probably kaicontact was deleted
               for (var id in metadata) {
                 if (kaicontacts[metadata[id].sync_id] == null) {
-                  console.log('DETELE T2', id)
+                  console.log('DETELE T2', id); // TODO BUG
                   deleteList.push(metadata[id]);
                 }
               }
