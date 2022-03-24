@@ -691,11 +691,16 @@
           console.log('createLock:', err)
         }
       } else if (protocol.flag === 13) { // TxSyncSMSRead13
-        console.log("TxSyncSMSRead13:", data)
         if (data.id != null) {
+          console.log("TxSyncSMSRead13:", data)
           data.id.forEach(id => {
-            console.log(id);
-            navigator.mozMobileMessage.markMessageRead(id, true);
+            const req = navigator.mozMobileMessage.markMessageRead(id, true)
+            req.onsuccess = () => {
+              console.log("Success markMessageRead", id);
+            }
+            req.onerror = () => {
+              console.log("Error markMessageRead", id);
+            }
           })
         }
       }
