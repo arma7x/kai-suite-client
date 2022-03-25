@@ -51,35 +51,9 @@
     },
     arrowLeftListener: function(evt) {
       console.log('arrowLeftListener', name);
-      const navClasses = document.getElementsByClassName(navClass);
-      if (navClasses[this.verticalNavIndex] != null) {
-        const dataKey = navClasses[this.verticalNavIndex].getAttribute('data-key');
-        if (dataKey === 'linear-progress') {
-          if (progressValue === 0)
-            return;
-          progressValue -= 10;
-        } else if (dataKey === 'range-slider') {
-          if (sliderValue === 0)
-            return;
-          sliderValue -= 10;
-        }
-      }
     },
     arrowRightListener: function(evt) {
       console.log('arrowRightListener', name);
-      const navClasses = document.getElementsByClassName(navClass);
-      if (navClasses[this.verticalNavIndex] != null) {
-        const dataKey = navClasses[this.verticalNavIndex].getAttribute('data-key');
-        if (dataKey === 'linear-progress') {
-          if (progressValue === 100)
-            return;
-          progressValue += 10;
-        } else if (dataKey === 'range-slider') {
-          if (sliderValue === 100)
-            return;
-          sliderValue += 10;
-        }
-      }
     },
   };
 
@@ -603,6 +577,13 @@
         })
         .catch(err => {
           console.log(err)
+          console.log('pushList:', []);
+          console.log('syncList:', []);
+          console.log('deleteList:', []);
+          console.log('mergedList:', []);
+          const txd = { push_list: pushList, sync_list: syncList, merged_list: mergedList, delete_list: deleteList }
+          const tx = { flag: 10, data: JSON.stringify(txd) }
+          ws.send(JSON.stringify(tx))
         })
       } else if (protocol.flag === 7) { // TxRestoreLocalContact7
         // console.log("TxRestoreLocalContacts:", data)
