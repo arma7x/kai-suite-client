@@ -434,31 +434,31 @@
             .then((result) => {
               if (result.length === 0) {
                 const txd = { namespace: data.namespace, sync_id: "error", sync_updated: "Added KaiContact but not found by category" }
-                const tx = { flag: 12, data: JSON.stringify(txd) }
+                const tx = { flag: 8, data: JSON.stringify(txd) }
                 ws.send(JSON.stringify(tx))
               } else {
                 const txd = { namespace: data.namespace, sync_id: result[0].id, sync_updated: result[0].updated }
-                const tx = { flag: 12, data: JSON.stringify(txd) }
+                const tx = { flag: 8, data: JSON.stringify(txd) }
                 ws.send(JSON.stringify(tx))
               }
             })
             .catch((err) => {
               const txd = { namespace: data.namespace, sync_id: "error", sync_updated: err.toString() }
-              const tx = { flag: 2, data: JSON.stringify(txd) }
+              const tx = { flag: 8, data: JSON.stringify(txd) }
               ws.send(JSON.stringify(tx))
             });
             console.log("Restore KaiContact:", data.namespace, kaicontact, data.person)
           } else {
             console.log("Skip Restore KaiContact:", data.namespace)
             const txd = { namespace: data.namespace, sync_id: "error", sync_updated: "skip" }
-            const tx = { flag: 12, data: JSON.stringify(txd) }
+            const tx = { flag: 8, data: JSON.stringify(txd) }
             ws.send(JSON.stringify(tx))
           }
         })
         .catch((err) => {
           console.log("Error Restore KaiContact:", data.namespace, err)
           const txd = { namespace: data.namespace, sync_id: "error", sync_updated: err.toString() }
-          const tx = { flag: 12, data: JSON.stringify(txd) }
+          const tx = { flag: 8, data: JSON.stringify(txd) }
           ws.send(JSON.stringify(tx))
         });
       } else if (protocol.flag === 5) { // TxSyncLocalContact5
@@ -509,7 +509,7 @@
               console.log('deleteList:', deleteList);
               console.log('mergedList:', mergedList);
               const txd = { push_list: pushList, sync_list: syncList, merged_list: mergedList, delete_list: deleteList }
-              const tx = { flag: 8, data: JSON.stringify(txd) }
+              const tx = { flag: 10, data: JSON.stringify(txd) }
               ws.send(JSON.stringify(tx))
             }
           }
@@ -794,7 +794,7 @@
       getSMS()
       .then(result => {
         console.log(result)
-        const tx = { flag: 10, data: JSON.stringify(result) }
+        const tx = { flag: 12, data: JSON.stringify(result) }
         ws.send(JSON.stringify(tx))
       })
       .catch(err => {
