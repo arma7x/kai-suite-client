@@ -36,10 +36,15 @@
       "description": "Manage KaiOS contact list"
     },
     "settings": {
-      "access": "readonly"
+      "access": "readonly",
+      "description": "ril.sms.encoding_mode"
     },
-    "mobileconnection": {},
-    "telephony": {},
+    "mobileconnection": {
+      "description": "Get ICCID for SMS"
+    },
+    "telephony": {
+      "description": "Use IMEI as device id"
+    },
     "desktop-notification": {
       "description": "Required for display notification"
     }
