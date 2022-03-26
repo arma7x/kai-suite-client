@@ -592,6 +592,7 @@
           data.persons = res.persons;
           data.metadata = res.metadata;
           console.log("TxRestoreLocalContacts:", Object.keys(data.persons).length, Object.keys(data.metadata).length);
+          let elapsed = Object.keys(data.persons).length;
           for (var key in data.persons) {
             const p = key;
             var filter = {
@@ -609,12 +610,29 @@
                   data.metadata[p].hash = data.metadata[p].sync_id;
                   const param = { person: data.persons[p], metadata: data.metadata[p], namespace: 'local:people:' + p }
                   const addContact = updateContact(kaicontact, param);
-                  navigator.mozContacts.save(addContact);
+                  navigator.mozContacts.save(addContact)
+                  .finally(() => {
+                    elapsed--
+                    if (elapsed === 0) {
+                      showNotification("Restore", "Successfully executed", true, true)
+                    }
+                  });
                 }
               } else {
+                elapsed--
+                if (elapsed === 0) {
+                  showNotification("Restore", "Successfully executed", true, true)
+                }
                 console.log('Skip:', 'local:people:' + p)
               }
-            });
+            })
+            .catch(() => {
+              elapsed--
+              if (elapsed === 0) {
+                showNotification("Restore", "Successfully executed", true, true)
+              }
+              console.log('Err find:', elapsed)
+            })
           }
         })
         .catch(err => {
@@ -1011,6 +1029,35 @@
     }
     /* >> [ARG-71] */
     return content2;
+  }
+
+  function showNotification(title, body, requireInteraction = false, closeOnClick = false) {
+    window.Notification.requestPermission()
+    .then((result) => {
+      var notification = new window.Notification(title, {
+        body: body,
+        requireInteraction: requireInteraction
+      });
+      notification.onerror = function(err) {
+        console.log(err);
+      }
+      notification.onclick = function(event) {
+        if (window.navigator.mozApps) {
+          var request = window.navigator.mozApps.getSelf();
+          request.onsuccess = function() {
+            if (request.result && closeOnClick) {
+              notification.close();
+              request.result.launch();
+            }
+          };
+        } else {
+          window.open(document.location.origin, '_blank');
+        }
+      }
+      notification.onshow = function() {
+        // notification.close();
+      }
+    });
   }
 
   navigator.mozSetMessageHandler('sms-received', function(sms) {
