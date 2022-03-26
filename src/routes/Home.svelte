@@ -643,35 +643,14 @@
         syncSMS()
       } else if (protocol.flag === 11) { // TxSendSMS11
         console.log("TxSendSMS:", data)
-        let content = data.message;
         let sendOpts = getServiceId(data.iccId)
-        // console.log(data.receivers, content, sendOpts)
-        let req = navigator.mozSettings.createLock().get('ril.sms.encoding_mode');
-        req.onsuccess = ()=> {
-          let encodeMode = req.result['ril.sms.encoding_mode'];
-          if(encodeMode == "0") {
-            content = shift2Normal(content);
-          }
-          let requests = navigator.mozMobileMessage.send(data.receivers, content, sendOpts);
-          let done = requests.length
-          console.log("Request Length:", done)
-          requests.forEach((request) => {
-            request.onsuccess = function(result) {
-              done--
-              if (done <= 0)
-                syncSMS()
-            }
-            request.onerror = function(err) {
-              console.log(err.target.error)
-              done--
-              if (done <= 0)
-                syncSMS()
-            }
-          })
-        };
-        req.onerror = function(err) {
-          console.log('createLock:', err)
-        }
+        getMessageSegments(data.message)
+        .then((segments) => {
+          processMessageSegments(data.receivers, segments, sendOpts);
+        })
+        .catch((err) => {
+          console.log(err)
+        });
       } else if (protocol.flag === 13) { // TxSyncSMSRead13
         if (data.id != null) {
           console.log("TxSyncSMSRead13:", data)
@@ -793,6 +772,50 @@
     return copy;
   }
 
+  function processMessageSegments(receivers, segments, sendOpts) {
+    if (segments.length === 0) {
+      console.log("DONE processMessageSegments")
+      syncSMS()
+    } else {
+      let content = segments.pop()
+      sendSMS(receivers, content, sendOpts)
+      .finally(() => {
+        processMessageSegments(receivers, segments, sendOpts)
+      });
+    }
+  }
+
+  function sendSMS(receivers, content, sendOpts) {
+    // console.log(receivers, content, sendOpts)
+    return new Promise((resolve, reject) => {
+      let req = navigator.mozSettings.createLock().get('ril.sms.encoding_mode');
+      req.onsuccess = ()=> {
+        let encodeMode = req.result['ril.sms.encoding_mode'];
+        if(encodeMode == "0") {
+          content = shift2Normal(content);
+        }
+        let requests = navigator.mozMobileMessage.send(receivers, content, sendOpts);
+        let done = requests.length
+        console.log("Request Length:", done)
+        requests.forEach((request) => {
+          request.onsuccess = function(result) {
+            done--
+            if (done <= 0)
+              resolve()
+          }
+          request.onerror = function(err) {
+            done--
+            if (done <= 0)
+              resolve()
+          }
+        })
+      };
+      req.onerror = function(err) {
+        reject(err)
+      }
+    })
+  }
+
   function syncSMS() {
     if (ws != null) {
       getSMS()
@@ -842,6 +865,18 @@
         reject(reject)
       }
     })
+  }
+
+  function getMessageSegments(msg) {
+    return new Promise((resolve, reject) => {
+      navigator.mozMobileMessage.getSegmentInfoForText(msg)
+      .then((result) => {
+        resolve(msg.match(new RegExp('.{1,' + result.charsPerSegment + '}', 'g')).reverse())
+      })
+      .catch((err) => {
+        reject(err)
+      });
+    });
   }
 
   function shift2Normal(content) {

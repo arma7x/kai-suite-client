@@ -80,6 +80,7 @@ export default {
         [
           '@babel/plugin-transform-runtime',
           {
+            "regenerator": false,
             useESModules: true,
           },
         ],
