@@ -1106,13 +1106,15 @@
 </script>
 
 <main id="home-screen" data-pad-top="28" data-pad-bottom="30">
-  <Separator title="Configuration" />
-  <TextInputField className="{navClass}" label="Ip Address" placeholder="Placeholder" value="{ipAddress}" type="text" onInput="{onInputIp}" onFocus="{onFocusIp}" onBlur="{onBlurIp}" />
-  <TextInputField className="{navClass}" label="Port" placeholder="Placeholder" value="{port}" type="tel" onInput="{onInputPort}" onFocus="{onFocusPort}" onBlur="{onBlurPort}" />
   <Button className="{navClass}" text="{conBtnLabel}" onClick={toggleConnection}>
     <span slot="rightWidget" class="kai-icon-arrow" style="margin:0px 5px;"></span>
   </Button>
+  <Separator title="Configuration" />
+  <TextInputField className="{navClass}" label="Ip Address" placeholder="Placeholder" value="{ipAddress}" type="text" onInput="{onInputIp}" onFocus="{onFocusIp}" onBlur="{onBlurIp}" />
+  <TextInputField className="{navClass}" label="Port" placeholder="Placeholder" value="{port}" type="tel" onInput="{onInputPort}" onFocus="{onFocusPort}" onBlur="{onBlurPort}" />
+<!--
   <ListView className="{navClass}" title="{getAppProp().localization.langByLocale('change_locale', locale)}" subtitle="{getAppProp().localization.langByLocale('change_locale_subtitle', locale)}" onClick={changeLocale}/>
+-->
   <Button className="{navClass}" text="Exit" onClick={onButtonExit}>
     <span slot="leftWidget" class="kai-icon-arrow" style="margin:0px 5px;-moz-transform: scale(-1, 1);-webkit-transform: scale(-1, 1);-o-transform: scale(-1, 1);-ms-transform: scale(-1, 1);transform: scale(-1, 1);"></span>
     <span slot="rightWidget" class="kai-icon-arrow" style="margin:0px 5px;"></span>
