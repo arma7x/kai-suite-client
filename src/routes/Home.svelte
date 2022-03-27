@@ -29,13 +29,13 @@
       if (inputSoftwareKey)
         return;
       openDialog();
-      console.log('softkeyLeftListener', name, this.verticalNavIndex);
+      // console.log('softkeyLeftListener', name, this.verticalNavIndex);
     },
     softkeyRightListener: function(evt) {
       if (inputSoftwareKey)
         return;
       toastMessage();
-      console.log('softkeyRightListener', name, this.verticalNavIndex);
+      // console.log('softkeyRightListener', name, this.verticalNavIndex);
     },
     enterListener: function(evt) {
       if (inputSoftwareKey)
@@ -44,16 +44,16 @@
       if (navClasses[this.verticalNavIndex] != null) {
         navClasses[this.verticalNavIndex].click();
       }
-      console.log('enterListener', name);
+      // console.log('enterListener', name);
     },
     backspaceListener: function(evt) {
-      console.log('backspaceListener', name);
+      // console.log('backspaceListener', name);
     },
     arrowLeftListener: function(evt) {
-      console.log('arrowLeftListener', name);
+      // console.log('arrowLeftListener', name);
     },
     arrowRightListener: function(evt) {
-      console.log('arrowRightListener', name);
+      // console.log('arrowRightListener', name);
     },
   };
 
@@ -86,17 +86,17 @@
         body: `Svelte is a radical new approach to building user interfaces. Whereas traditional frameworks like React and Vue do the bulk of their work in the browser, Svelte shifts that work into a compile step that happens when you build your app. Instead of using techniques like virtual DOM diffing, Svelte writes code that surgically updates the DOM when the state of your app changes. We're proud that Svelte was recently voted the most loved web framework with the most satisfied developers in a pair of industry surveys. We think you'll love it too. Read the introductory blog post to learn more.`,
         softKeyCenterText: 'hide',
         onSoftkeyLeft: (evt) => {
-          console.log('onSoftkeyLeft');
+          // console.log('onSoftkeyLeft');
         },
         onSoftkeyRight: (evt) => {
-          console.log('onSoftkeyRight');
+          // console.log('onSoftkeyRight');
         },
         onEnter: (evt) => {
-          console.log('onEnter');
+          // console.log('onEnter');
           dialog.$destroy();
         },
         onBackspace: (evt) => {
-          console.log('onBackspace');
+          // console.log('onBackspace');
           evt.preventDefault();
           evt.stopPropagation();
           dialog.$destroy();
@@ -117,7 +117,7 @@
   }
 
   function onFocusIp(evt) {
-    console.log('onFocus onFocusIp');
+    // console.log('onFocus onFocusIp');
     inputSoftwareKey = new SoftwareKey({
       target: document.body,
       props: {
@@ -130,7 +130,7 @@
   }
 
   function onBlurIp(evt) {
-    console.log('onBlur onBlurIp');
+    // console.log('onBlur onBlurIp');
     if (inputSoftwareKey) {
       inputSoftwareKey.$destroy();
       inputSoftwareKey = null;
@@ -138,12 +138,12 @@
   }
 
   function onInputIp(evt) {
-    console.log('onInput onInputIp', evt.target.value);
+    // console.log('onInput onInputIp', evt.target.value);
     ipAddress = evt.target.value.toString();
   }
 
   function onFocusPort(evt) {
-    console.log('onFocus onFocusPort');
+    // console.log('onFocus onFocusPort');
     inputSoftwareKey = new SoftwareKey({
       target: document.body,
       props: {
@@ -156,7 +156,7 @@
   }
 
   function onBlurPort(evt) {
-    console.log('onBlur onBlurPort');
+    // console.log('onBlur onBlurPort');
     if (inputSoftwareKey) {
       inputSoftwareKey.$destroy();
       inputSoftwareKey = null;
@@ -164,7 +164,7 @@
   }
 
   function onInputPort(evt) {
-    console.log('onInput onInputPort', evt.target.value);
+    // console.log('onInput onInputPort', evt.target.value);
     port = evt.target.value.toString();
   }
 
@@ -180,19 +180,19 @@
         options: locales,
         softKeyCenterText: 'select',
         onSoftkeyRight: (evt, scope) => {
-          console.log('onSoftkeyRight', scope);
+          // console.log('onSoftkeyRight', scope);
         },
         onSoftkeyLeft: (evt, scope) => {
-          console.log('onSoftkeyRight', scope);
+          // console.log('onSoftkeyRight', scope);
         },
         onEnter: (evt, scope) => {
-          console.log('onEnter', scope);
+          // console.log('onEnter', scope);
           getAppProp().localization.loadLocale(scope.selected.subtitle);
           locale = getAppProp().localization.defaultLocale;
           localeMenu.$destroy();
         },
         onBackspace: (evt, scope) => {
-          console.log('onBackspace', scope);
+          // console.log('onBackspace', scope);
           evt.preventDefault();
           evt.stopPropagation();
           localeMenu.$destroy();
@@ -201,7 +201,7 @@
           navInstance.detachListener();
         },
         onClosed: (scope) => {
-          console.log(scope);
+          // console.log(scope);
           navInstance.attachListener();
           localeMenu = null;
         }
@@ -300,7 +300,7 @@
       }
       console.log("Flag:", protocol.flag)
       if (protocol.flag === 1) { // TxSyncGoogleContact
-        var filter = {
+        const filter = {
           filterBy: ['category'],
           filterValue: data.namespace,
           filterOp: 'equals',
@@ -310,7 +310,7 @@
         .then(contact => {
           if (contact.length === 0) {
             if (data.metadata.sync_id != null || data.metadata.sync_updated != null || data.metadata.deleted) {
-              console.log( "Deleted KaiContact:", data.metadata)
+              // console.log( "Deleted KaiContact:", data.metadata)
               const txd = { namespace: data.namespace, sync_id: data.metadata.sync_id, sync_updated: data.metadata.sync_updated }
               const tx = { flag: 6, data: JSON.stringify(txd) }
               ws.send(JSON.stringify(tx))
@@ -338,16 +338,16 @@
               const tx = { flag: 2, data: JSON.stringify(txd) }
               ws.send(JSON.stringify(tx))
             });
-            console.log("Add to KaiContact:", data.namespace, kaicontact, data.person)
+            // console.log("Add to KaiContact:", data.namespace, kaicontact, data.person)
           } else {
             if (data.metadata.deleted) {
-              console.log(0, "Delete KaiContact:", data.metadata, contact[0])
+              // console.log(0, "Delete KaiContact:", data.metadata, contact[0])
               navigator.mozContacts.remove(contact[0]);
               const txd = { namespace: data.namespace, sync_id: data.metadata.sync_id, sync_updated: data.metadata.sync_updated }
               const tx = { flag: 6, data: JSON.stringify(txd) }
               ws.send(JSON.stringify(tx))
             } else if (data.metadata.hash != contact[0].key[0]) {
-              console.log(1, "Update KaiContact:", data.metadata, contact[0])
+              // console.log(1, "Update KaiContact:", data.metadata, contact[0])
               var kaicontact = updateContact(contact[0], data);
               navigator.mozContacts.save(kaicontact)
               .then(() => {
@@ -370,7 +370,7 @@
                 ws.send(JSON.stringify(tx))
               });
             } else if (contact[0].updated > new Date(data.metadata.sync_updated)) {
-              console.log(2, "Update KaiContact:", data.metadata, contact[0])
+              // console.log(2, "Update KaiContact:", data.metadata, contact[0])
               const txd = { namespace: data.namespace, kai_contact: contact[0] }
               const tx = { flag: 4, data: JSON.stringify(txd) }
               ws.send(JSON.stringify(tx))
@@ -383,14 +383,14 @@
           }
         })
         .catch((err) => {
-          console.log("Error KaiContact:", data.namespace, err)
+          // console.log("Error KaiContact:", data.namespace, err)
           const txd = { namespace: data.namespace, sync_id: "error", sync_updated: err.toString() }
           const tx = { flag: 2, data: JSON.stringify(txd) }
           ws.send(JSON.stringify(tx))
         });
       } else if (protocol.flag === 3) { // TxRestoreGoogleContact3
-        console.log("TxRestoreGoogleContact:", data)
-        var filter = {
+        // console.log("TxRestoreGoogleContact:", data)
+        const filter = {
           filterBy: ['category'],
           filterValue: data.namespace,
           filterOp: 'equals',
@@ -421,16 +421,16 @@
               const tx = { flag: 8, data: JSON.stringify(txd) }
               ws.send(JSON.stringify(tx))
             });
-            console.log("Restore KaiContact:", data.namespace, kaicontact, data.person)
+            // console.log("Restore KaiContact:", data.namespace, kaicontact, data.person)
           } else {
-            console.log("Skip Restore KaiContact:", data.namespace)
+            // console.log("Skip Restore KaiContact:", data.namespace)
             const txd = { namespace: data.namespace, sync_id: "error", sync_updated: "skip" }
             const tx = { flag: 8, data: JSON.stringify(txd) }
             ws.send(JSON.stringify(tx))
           }
         })
         .catch((err) => {
-          console.log("Error Restore KaiContact:", data.namespace, err)
+          // console.log("Error Restore KaiContact:", data.namespace, err)
           const txd = { namespace: data.namespace, sync_id: "error", sync_updated: err.toString() }
           const tx = { flag: 8, data: JSON.stringify(txd) }
           ws.send(JSON.stringify(tx))
@@ -445,12 +445,12 @@
         })
         .then((kaicontacts) => {
 
-          function syncPersons() {
-            if (personsElapsed <= 0) {
+          function sync() {
+            if (kaicontactsElapsed <= 0) {
               // if metadata not exist in kaicontacts, probably kaicontact was deleted
               for (var id in metadata) {
                 if (kaicontacts[metadata[id].sync_id] == null) {
-                  console.log('DETELE T2', id); // TODO BUG
+                  // console.log('DETELE T2', id); // TODO BUG
                   deleteList.push(metadata[id]);
                 }
               }
@@ -470,34 +470,34 @@
           let syncList = []; // {kaicontact, metadata}
           let mergedList = [];   // {kaicontact, metadata, person}
           let deleteList = []; // metadata
-          let personsElapsed = Object.keys(persons).length;
+          let kaicontactsElapsed = Object.keys(kaicontacts).length;
           console.log('kaicontacts:', Object.keys(kaicontacts).length);
-          console.log('persons:', Object.keys(kaicontacts).length);
-          console.log('metadata:', Object.keys(kaicontacts).length);
+          console.log('persons:', Object.keys(data.persons).length);
+          console.log('metadata:', Object.keys(data.metadata).length);
 
-          if (personsElapsed > 0) {
+          if (kaicontactsElapsed > 0) {
             for (var _kid in kaicontacts) {
               const kaicontact = kaicontacts[_kid];
               const kid = kaicontact.key != null ? kaicontact.key[0] : kaicontact.id;
-              console.log(kid, kaicontact)
+              // console.log(kid, kaicontact)
               if ((metadata[kid] != null && metadata[kid].deleted) || (metadata[kid] == null && kaicontact.key != null)) {
                 // delete: kaicontact
                 navigator.mozContacts.remove(kaicontact);
                 if (metadata[kid] != null) {
                   // delete: person
-                  console.log('DETELE T1', kid)
+                  // console.log('DETELE T1', kid)
                   deleteList.push(metadata[kid]);
                 }
-                personsElapsed--;
-                syncPersons();
+                kaicontactsElapsed--;
+                sync();
               } else if (metadata[kid] && metadata[kid].deleted === false && persons[kid]) {
                 if (new Date(metadata[kid].sync_updated) > kaicontact.updated) {
-                  console.log('person > kaicontact', kid)
+                  // console.log('person > kaicontact', kid)
                   // update kaicontact then metadata[kid].sync_updated = updatedContact.updated
                   metadata[kid].hash = kid
                   const data = { person: persons[kid], metadata: metadata[kid], namespace: 'local:people:' + kid }
                   const updatedContact = updateContact(kaicontact, data)
-                  var filter = {
+                  const filter = {
                     filterBy: ['category'],
                     filterValue: data.namespace,
                     filterOp: 'equals',
@@ -509,36 +509,36 @@
                   })
                   .then((result) => {
                     if (result.length === 0) {
-                      personsElapsed--;
-                      syncPersons();
+                      kaicontactsElapsed--;
+                      sync();
                     } else {
                       // update metadata[kid].hash on desktop app
                       metadata[kid].sync_updated = result[0].updated;
                       syncList.push({ kai_contact: result[0], metadata: metadata[kid] });
-                      personsElapsed--;
-                      syncPersons();
+                      kaicontactsElapsed--;
+                      sync();
                     }
                   })
                   .catch((err) => {
-                    personsElapsed--;
-                    syncPersons();
+                    kaicontactsElapsed--;
+                    sync();
                   });
                 } else if (new Date(metadata[kid].sync_updated) < kaicontact.updated) {
-                  console.log('kaicontact > person', kid)
+                  // console.log('kaicontact > person', kid)
                   // update person by kaicontact
                   // update metadata[kid].hash on desktop app
                   metadata[kid].sync_updated = kaicontact.updated;
                   syncList.push({ kai_contact: kaicontact, metadata: metadata[kid] });
-                  personsElapsed--;
-                  syncPersons();
+                  kaicontactsElapsed--;
+                  sync();
                 } else {
-                  console.log('kaicontact === person', kid)
-                  personsElapsed--;
-                  syncPersons();
+                  // console.log('kaicontact === person', kid)
+                  kaicontactsElapsed--;
+                  sync();
                 }
-              } else if (metadata[kid] == null && kaicontact.key == null) {
+              } else if (metadata[kid] == null || kaicontact.key == null) {
                 // new kaicontact to app
-                var filter = {
+                const filter = {
                   filterBy: ['category'],
                   filterValue: 'local:people:' + kid,
                   filterOp: 'equals',
@@ -552,27 +552,27 @@
                 })
                 .then((result) => {
                   if (result.length === 0) {
-                    personsElapsed--;
-                    syncPersons();
+                    kaicontactsElapsed--;
+                    sync();
                   } else {
                     const mt = { sync_id: kid, sync_updated: kaicontact.updated, hash: "new" }
                     pushList.push({ kai_contact: result[0], metadata: mt });
-                    personsElapsed--;
-                    syncPersons();
+                    kaicontactsElapsed--;
+                    sync();
                   }
                 })
                 .catch((err) => {
-                  personsElapsed--;
-                  syncPersons();
+                  kaicontactsElapsed--;
+                  sync();
                 });
               } else {
                 console.warn('TRACE', kaicontact);
-                personsElapsed--;
-                syncPersons();
+                kaicontactsElapsed--;
+                sync();
               }
             }
           } else {
-            syncPersons();
+            sync();
           }
         })
         .catch(err => {
@@ -587,56 +587,154 @@
         })
       } else if (protocol.flag === 7) { // TxRestoreLocalContact7
         // console.log("TxRestoreLocalContacts:", data)
+
         getLocalContacts()
         .then((res) => {
+          function restore() {
+            // console.log("START RESTORE")
+            let pushList = []; // {kaicontact, metadata}
+            getKaiContacts()
+            .then((kaicontacts) => {
+              // console.log(kaicontacts)
+              let kaicontactsElapsed = Object.keys(kaicontacts).length;
+              console.log('kaicontacts:', kaicontactsElapsed)
+              if (kaicontactsElapsed > 0) {
+                for (var _kid in kaicontacts) {
+                  const kaicontact = kaicontacts[_kid];
+                  const kid = kaicontact.key != null ? kaicontact.key[0] : kaicontact.id;
+                  if (data.metadata[kid] == null || kaicontact.key == null) {
+                    // new kaicontact to app
+                    const filter = {
+                      filterBy: ['category'],
+                      filterValue: 'local:people:' + kid,
+                      filterOp: 'equals',
+                      filterLimit: 1
+                    };
+                    // console.log("PushList:", filter.filterValue)
+                    kaicontact.key = [kid];
+                    kaicontact.category = ['local:people:' + kid];
+                    navigator.mozContacts.save(kaicontact)
+                    .then(() => {
+                      return navigator.mozContacts.find(filter)
+                    })
+                    .then((result) => {
+                      if (result.length === 0) {
+                        kaicontactsElapsed--;
+                        if (kaicontactsElapsed <= 0) {
+                          console.log('pushList:', pushList);
+                          const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
+                          const tx = { flag: 10, data: JSON.stringify(txd) }
+                          ws.send(JSON.stringify(tx))
+                        }
+                      } else {
+                        // console.log("Pushed:", result[0].id)
+                        const mt = { sync_id: kid, sync_updated: kaicontact.updated, hash: "new" }
+                        pushList.push({ kai_contact: result[0], metadata: mt });
+                        kaicontactsElapsed--;
+                        if (kaicontactsElapsed <= 0) {
+                          console.log('pushList:', pushList);
+                          const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
+                          const tx = { flag: 10, data: JSON.stringify(txd) }
+                          ws.send(JSON.stringify(tx))
+                        }
+                      }
+                    })
+                    .catch((err) => {
+                      kaicontactsElapsed--;
+                      if (kaicontactsElapsed <= 0) {
+                        console.log('pushList:', pushList);
+                        const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
+                        const tx = { flag: 10, data: JSON.stringify(txd) }
+                        ws.send(JSON.stringify(tx))
+                      }
+                    });
+                  } else {
+                    kaicontactsElapsed--;
+                    if (kaicontactsElapsed <= 0) {
+                      console.log('pushList:', pushList);
+                      const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
+                      const tx = { flag: 10, data: JSON.stringify(txd) }
+                      ws.send(JSON.stringify(tx))
+                    }
+                  }
+                }
+              } else {
+                console.log('pushList:', pushList);
+                const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
+                const tx = { flag: 10, data: JSON.stringify(txd) }
+                ws.send(JSON.stringify(tx))
+              }
+            })
+            .catch((err) => {
+              console.log(err)
+              console.log('pushList:', pushList);
+              const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
+              const tx = { flag: 10, data: JSON.stringify(txd) }
+              ws.send(JSON.stringify(tx))
+            })
+          }
+
           data.persons = res.persons;
           data.metadata = res.metadata;
           console.log("TxRestoreLocalContacts:", Object.keys(data.persons).length, Object.keys(data.metadata).length);
           let elapsed = Object.keys(data.persons).length;
-          for (var key in data.persons) {
-            const p = key;
-            var filter = {
-              filterBy: ['category'],
-              filterValue: 'local:people:' + p,
-              filterOp: 'equals',
-              filterLimit: 1
-            };
-            navigator.mozContacts.find(filter)
-            .then((result) => {
-              if (result.length === 0) {
-                if (data.metadata[p]) {
-                  console.log(p, data.metadata[p].sync_id)
-                  var kaicontact = new mozContact();
-                  data.metadata[p].hash = data.metadata[p].sync_id;
-                  const param = { person: data.persons[p], metadata: data.metadata[p], namespace: 'local:people:' + p }
-                  const addContact = updateContact(kaicontact, param);
-                  navigator.mozContacts.save(addContact)
-                  .finally(() => {
-                    elapsed--
-                    if (elapsed === 0) {
-                      showNotification("Restore", "Successfully executed", true, true)
-                    }
-                  });
+          if (elapsed > 0) {
+            for (var key in data.persons) {
+              const p = key;
+              const filter = {
+                filterBy: ['category'],
+                filterValue: 'local:people:' + p,
+                filterOp: 'equals',
+                filterLimit: 1
+              };
+              navigator.mozContacts.find(filter)
+              .then((result) => {
+                if (result.length === 0) {
+                  if (data.metadata[p]) {
+                    // console.log("Restore", p, data.metadata[p].sync_id)
+                    var kaicontact = new mozContact();
+                    data.metadata[p].hash = data.metadata[p].sync_id;
+                    const param = { person: data.persons[p], metadata: data.metadata[p], namespace: 'local:people:' + p }
+                    const addContact = updateContact(kaicontact, param);
+                    navigator.mozContacts.save(addContact)
+                    .then(() => {
+                      elapsed--
+                      // console.log('Ok Save:', elapsed)
+                      if (elapsed === 0) {
+                        restore()
+                      }
+                    })
+                    .catch(() => {
+                      elapsed--
+                      if (elapsed === 0) {
+                        restore()
+                      }
+                      // console.log('Err Save:', elapsed)
+                    });
+                  }
+                } else {
+                  elapsed--
+                  if (elapsed === 0) {
+                    restore()
+                  }
+                  // console.log('Skip:', 'local:people:' + p)
                 }
-              } else {
-                elapsed--
-                if (elapsed === 0) {
-                  showNotification("Restore", "Successfully executed", true, true)
-                }
-                console.log('Skip:', 'local:people:' + p)
-              }
-            })
-            .catch(() => {
-              elapsed--
-              if (elapsed === 0) {
-                showNotification("Restore", "Successfully executed", true, true)
-              }
-              console.log('Err find:', elapsed)
-            })
+              })
+              //.catch(() => {
+                //elapsed--
+                //if (elapsed === 0) {
+                  //showNotification("Restore", "Successfully executed", true, true)
+                //}
+                //console.log('Err find:', elapsed)
+              //})
+            }
+          } else {
+            restore()
           }
         })
         .catch(err => {
           console.log(err)
+          restore()
         })
       } else if (protocol.flag === 9) { // TxSyncSMS9
         console.log("TxSyncSMS:", data);
