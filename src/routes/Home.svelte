@@ -762,6 +762,15 @@
             }
           })
         }
+      } else if (protocol.flag === 15) { // TxSyncSMSDelete15
+        console.log("TxSyncSMSDelete15:", data.id)
+        const req = navigator.mozMobileMessage.delete(data.id)
+        req.onsuccess = () => {
+          syncSMS()
+        }
+        req.onerror = () => {
+          syncSMS()
+        }
       }
     }
   }
