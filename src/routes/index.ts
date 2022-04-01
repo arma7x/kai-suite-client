@@ -1,7 +1,7 @@
 import Home from "./Home.svelte";
-import Room from "./Room.svelte";
+import Contacts from "./Contacts.svelte";
 
 export {
   Home,
-  Room
+  Contacts
 }

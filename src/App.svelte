@@ -1,22 +1,19 @@
 <script lang="ts">
   import { Router, Route, Link } from 'svelte-navigator';
   import { AppBar, SoftwareKey } from './components';
-  import { Home, Room } from './routes';
+  import { Home, Contacts } from './routes';
   import { onMount, onDestroy } from 'svelte';
-  import localForage from 'localforage';
   import { Localization } from './utils/localization';
+  import SyncHub from './synchub/hub';
 
   export let localization = new Localization('en-US', 'langs');
   export let appBar;
   export let softwareKey;
 
-  localForage.setDriver(localForage.INDEXEDDB);
-  const dbName = 'SYNC';
-  const syncContactDb = localForage.createInstance({ name: dbName, storeName: 'contacts' });
-  const syncEventDb = localForage.createInstance({ name: dbName, storeName: 'events' });
+  const hub = new SyncHub();
 
   export const getAppProp = () => {
-    return {appBar, softwareKey, localization, syncContactDb, syncEventDb};
+    return {appBar, softwareKey, localization, hub};
   }
 
   onMount(() => {
@@ -32,8 +29,8 @@
     <Route primary={false} path="index.html" let:location let:navigate>
       <svelte:component this="{Home}" {location} {navigate} {getAppProp}/>
     </Route>
-    <Route path="room" let:location let:navigate>
-      <svelte:component this="{Room}" {location} {navigate} {getAppProp}/>
+    <Route path="contacts" let:location let:navigate>
+      <svelte:component this="{Contacts}" {location} {navigate} {getAppProp}/>
     </Route>
   </main>
   <SoftwareKey bind:this={softwareKey} />
