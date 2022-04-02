@@ -555,7 +555,6 @@ class SyncHub {
 
   addStatusListener(fn: StatusListenerFn) {
     this.statusListener.push(fn);
-    console.log(this.statusListener);
   }
  
   removeStatusListener(fn: StatusListenerFn) {
@@ -563,7 +562,6 @@ class SyncHub {
     if (index > -1) {
       this.statusListener.splice(index, 1);
     }
-    console.log(this.statusListener);
   }
 
   getServerLocalContacts(): Promise<any> {

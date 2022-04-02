@@ -336,6 +336,26 @@ const getKaiContacts = (): Promise<any> => {
   });
 }
 
+const getDeviceContacts = (): Promise<any> => {
+  let kaicontacts = [];
+  return new Promise((resolve, reject) => {
+    var cursor = navigator.mozContacts.getAll()
+    cursor.onsuccess = function () {
+      if (!this.done) {
+        if(cursor.result !== null) {
+          kaicontacts.push(cursor.result)
+          this.continue()
+        }
+      } else if (this.done) {
+        resolve(kaicontacts);
+      }
+    }
+    cursor.onerror = (err) => {
+      reject(err)
+    }
+  });
+}
+
 export {
   isValidIpPort,
   updateContact,
@@ -346,4 +366,5 @@ export {
   showNotification,
   getIMEI,
   getKaiContacts,
+  getDeviceContacts,
 }
