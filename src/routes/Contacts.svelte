@@ -2,21 +2,27 @@
   import { navigate as goto } from "svelte-navigator";
   import { createKaiNavigator } from '../utils/navigation';
   import { onMount, onDestroy } from 'svelte';
+  import { getDeviceContacts } from '../synchub/utils';
+  import { ListView } from '../components';
 
   export let location: any;
   export let navigate: any;
   export let getAppProp: Function;
 
-  let name: string = 'Room';
+  let name: string = 'Phonebook';
+  let pageCursor: int = -1;
+  let pages: Array<any> = [];
+  let contactList: Array<any> = [];
 
   let navOptions = {
-    verticalNavClass: 'vertClass',
-    horizontalNavClass: 'horzClass',
+    verticalNavClass: 'contactsNav',
     softkeyLeftListener: function(evt) {
       console.log('softkeyLeftListener', name);
+      prevPage(pageCursor)
     },
     softkeyRightListener: function(evt) {
       console.log('softkeyRightListener', name);
+      nextPage(pageCursor)
     },
     enterListener: function(evt) {
       console.log('enterListener', name);
@@ -34,8 +40,21 @@
     console.log('onMount', name);
     const { appBar, softwareKey } = getAppProp();
     appBar.setTitleText(name);
-    softwareKey.setText({ left: `${name} L`, center: `${name} C`, right: `${name} R` });
+    softwareKey.setText({ left: `Prev`, center: `SELECT`, right: `Next` });
     navInstance.attachListener();
+    getDeviceContacts()
+    .then((contacts) => {
+      const chunkSize = 50;
+      for (let i = 0; i < contacts.length; i += chunkSize) {
+        const chunk = contacts.slice(i, i + chunkSize);
+        pages.push(chunk);
+      }
+      console.log(pages)
+      nextPage(pageCursor)
+    })
+    .catch(err => {
+      console.warn(err)
+    });
   });
 
   onDestroy(() => {
@@ -43,42 +62,51 @@
     navInstance.detachListener();
   });
 
+  function prevPage(p) {
+    if (pages[p - 1] != null) {
+      navInstance.verticalNavIndex = -1
+      pageCursor = p - 1;
+      contactList = []
+      setTimeout(() => {
+        contactList = pages[pageCursor]
+        setTimeout(() => {
+          navInstance.navigateListNav(1);
+        }, 200)
+      }, 100)
+      //console.log(pageCursor, contactList)
+    }
+  }
+
+  function nextPage(p) {
+    if (pages[p + 1] != null) {
+      navInstance.verticalNavIndex = -1
+      pageCursor = p + 1;
+      contactList = []
+      setTimeout(() => {
+        contactList = pages[pageCursor]
+        setTimeout(() => {
+          navInstance.navigateListNav(1);
+        }, 200)
+      }, 100)
+      //console.log(pageCursor, contactList)
+    }
+  }
+
+  function select(user) {
+    console.log(user)
+  }
+
 </script>
 
-<main id="room-screen" data-pad-top="28" data-pad-bottom="30">
-  <h1>Hello {name}!</h1>
-  <div class="vertical">
-    <div class="vertClass">Vertical 1</div>
-    <div class="vertClass">Vertical 2</div>
-  </div>
-  <div class="horizontal">
-    <div style="flex:1;" class="horzClass">Horizontal 1</div>
-    <div style="flex:1;" class="horzClass">Horizontal 2</div>
-  </div>
+<main id="phonebook-screen" data-pad-top="28" data-pad-bottom="30">
+  {#each contactList as user}
+  <ListView className="contactsNav" title="{user.name[0]}" subtitle="{user.tel[0].value}" onClick={() => select(user)}/>
+  {/each}
 </main>
 
 <style>
-  #room-screen {
+  #phonebook-screen {
     overflow: scroll;
     width: 100%;
-  }
-  #room-screen > .vertical {
-    display:flex;
-    flex-direction:column;
-  }
-  #room-screen > .horizontal {
-    width:100%;
-    display:flex;
-    flex-direction:row;
-  }
-  #room-screen > .vertical > .vertClass
-  #room-screen > .vertical > .horizontal {
-    background-color: #ffffff;
-    color: #000000;
-  }
-  :global(#room-screen > .vertical > .vertClass.focus),
-  :global(#room-screen > .horizontal > .horzClass.focus) {
-    background-color: red!important;
-    color: #fff!important;
   }
 </style>
