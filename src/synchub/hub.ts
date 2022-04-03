@@ -225,7 +225,7 @@ class SyncHub {
           })
           .then((kaicontacts) => {
 
-            function sync() {
+            const sync = () => {
               if (kaicontactsElapsed <= 0) {
                 // if metadata not exist in kaicontacts, probably kaicontact was deleted
                 for (var id in metadata) {
@@ -364,7 +364,7 @@ class SyncHub {
         } else if (protocol.flag === 7) { // TxRestoreLocalContact7
           // console.log("TxRestoreLocalContacts:", data)
 
-          function restore() {
+          const restore = () => {
             // console.log("START RESTORE")
             let pushList = []; // {kaicontact, metadata}
             getKaiContacts()
