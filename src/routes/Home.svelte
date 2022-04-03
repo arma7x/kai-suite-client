@@ -215,7 +215,7 @@
     currentLocale = getAppProp().localization.defaultLocale;
     const { appBar, softwareKey } = getAppProp();
     appBar.setTitleText(name);
-    softwareKey.setText({ left: `Dialog L`, center: `${name} C`, right: `Toast R` });
+    softwareKey.setText({ left: "", center: "SELECT", right: "" });
     navInstance.attachListener();
     getAppProp().hub.addStatusListener(onStatusChange)
     if (getAppProp().hub.status == true)
