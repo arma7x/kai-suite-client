@@ -258,11 +258,11 @@
   function showOptionMenu() {
     const user = pages[pageCursor][navInstance.verticalNavIndex]
     let opts = [
-      { title: 'Edit', subtitle: null },
+      { title: 'Edit[TODO]', subtitle: null },
       { title: 'Call', subtitle: null },
       { title: 'Send Message', subtitle: null },
       { title: 'Share', subtitle: null },
-      { title: 'Delete', subtitle: null },
+      { title: 'Delete[TODO]', subtitle: null },
     ]
     if (user == null)
       opts = [{ title: 'New', subtitle: null }]
