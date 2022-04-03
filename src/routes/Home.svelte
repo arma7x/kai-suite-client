@@ -11,7 +11,7 @@
   export let getAppProp: Function;
 
   let currentLocale: string;
-  let name: string = 'Home';
+  let name: string = 'Kai Suite';
   let ipAddress: string = '192.168.43.33';
   let port: string = '4444';
   let conBtnLabel: string = 'Connect';
