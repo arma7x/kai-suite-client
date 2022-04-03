@@ -659,7 +659,7 @@ class SyncHub {
             var cursorMessage = navigator.mozMobileMessage.getMessages({ threadId: cursorThread.result.id }, false)
             cursorMessage.onsuccess = function() {
               if (!cursorMessage.done) {
-                if(cursorMessage.result !== null) {
+                if (cursorMessage.result !== null && cursorMessage.result.type == 'sms') {
                   messages[cursorThread.result.id].push(clone(cursorMessage.result))
                   cursorMessage.continue()
                 }
