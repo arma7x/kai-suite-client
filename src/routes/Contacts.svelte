@@ -31,11 +31,9 @@
   let navOptions = {
     verticalNavClass: 'contactsNav',
     softkeyLeftListener: function(evt) {
-      console.log('softkeyLeftListener', name);
       showSearchDialog()
     },
     softkeyRightListener: function(evt) {
-      console.log('softkeyRightListener', name);
       showOptionMenu()
     },
     arrowLeftListener: function(evt) {
@@ -49,10 +47,8 @@
       if (navClasses[this.verticalNavIndex] != null) {
         navClasses[this.verticalNavIndex].click();
       }
-      console.log('enterListener', name);
     },
     backspaceListener: function(evt) {
-      console.log('backspaceListener', name);
       evt.preventDefault();
       goto(-1);
     }
@@ -61,7 +57,6 @@
   let navInstance = createKaiNavigator(navOptions);
 
   onMount(() => {
-    console.log('onMount', name);
     const { appBar, softwareKey } = getAppProp();
     appBar.setTitleText(name);
     softwareKey.setText({ left: "Search", center: "SELECT", right: "Options" });
@@ -75,7 +70,6 @@
         pages.push(chunk);
       }
       nextPage(pageCursor)
-      //console.log(pages)
     })
     .catch(err => {
       console.warn(err)
@@ -89,7 +83,6 @@
   });
 
   onDestroy(() => {
-    console.log('onDestroy', name);
     document.removeEventListener('keydown', callButtonHandler);
     navInstance.detachListener();
   });
@@ -101,18 +94,12 @@
         title: title,
         body: body,
         softKeyCenterText: 'hide',
-        onSoftkeyLeft: (evt) => {
-          // console.log('onSoftkeyLeft');
-        },
-        onSoftkeyRight: (evt) => {
-          // console.log('onSoftkeyRight');
-        },
+        onSoftkeyLeft: (evt) => {},
+        onSoftkeyRight: (evt) => {},
         onEnter: (evt) => {
-          // console.log('onEnter');
           dialog.$destroy();
         },
         onBackspace: (evt) => {
-          // console.log('onBackspace');
           evt.preventDefault();
           evt.stopPropagation();
           dialog.$destroy();
@@ -150,7 +137,7 @@
       pageCursor = p - 1;
       contactList = []
       setTimeout(() => {
-        appBar.setTitleText(`${name}(${pageCursor+1}/${pages.length})`);
+        appBar.setTitleText(`${name}(${pageCursor+1}/${pages.length}) [${pages[pageCursor].length}]`);
         contactList = pages[pageCursor]
         setTimeout(() => {
           navInstance.navigateListNav(1);
@@ -173,7 +160,7 @@
       pageCursor = p + 1;
       contactList = []
       setTimeout(() => {
-        appBar.setTitleText(`${name}(${pageCursor+1}/${pages.length})`);
+        appBar.setTitleText(`${name}(${pageCursor+1}/${pages.length}) [${pages[pageCursor].length}]`);
         contactList = pages[pageCursor]
         setTimeout(() => {
           navInstance.navigateListNav(1);
@@ -196,7 +183,7 @@
   function callButtonHandler(evt) {
     const user = pages[pageCursor][navInstance.verticalNavIndex]
     if (evt.key === 'Call' && user != null) {
-      console.log('callButtonHandler', evt.key, pageCursor, navInstance.verticalNavIndex)
+      // console.log('callButtonHandler', evt.key, pageCursor, navInstance.verticalNavIndex)
       call(user)
     }
   }
@@ -213,28 +200,23 @@
         placeholder: 'Enter search keyword',
         type: 'text',
         onSoftkeyLeft: (evt, value) => {
-          console.log('onSoftkeyLeft', value);
           contactSearchDialog.$destroy();
         },
         onSoftkeyRight: (evt, value) => {
-          console.log('onSoftkeyRight', value);
           searchContacts("");
           contactSearchDialog.$destroy();
         },
         onEnter: (evt, value) => {
-          console.log('onEnter', value);
           searchContacts(value.trim());
           contactSearchDialog.$destroy();
         },
         onBackspace: (evt, value) => {
-          console.log('onBackspace', value);
           evt.stopPropagation();
         },
         onOpened: () => {
           navInstance.detachListener();
         },
         onClosed: (value) => {
-          console.log('onClosed', value)
           navInstance.attachListener();
           contactSearchDialog = null;
         }
@@ -277,7 +259,7 @@
       { title: 'Call', subtitle: null },
       { title: 'Send Message', subtitle: null },
       { title: 'Share', subtitle: null },
-      { title: 'Delete[TODO]', subtitle: null },
+      { title: 'Delete', subtitle: null },
     ]
     if (user == null)
       opts = [{ title: 'New', subtitle: null }]
@@ -290,14 +272,9 @@
         focusIndex: 0,
         options: opts,
         softKeyCenterText: 'select',
-        onSoftkeyRight: (evt, scope) => {
-          console.log('onSoftkeyRight', scope);
-        },
-        onSoftkeyLeft: (evt, scope) => {
-          console.log('onSoftkeyRight', scope);
-        },
+        onSoftkeyRight: (evt, scope) => {},
+        onSoftkeyLeft: (evt, scope) => {},
         onEnter: (evt, scope) => {
-          console.log('onEnter', scope.selected.title);
           if (scope.selected.title === 'New') {
             create()
           } else if (scope.selected.title === 'Edit') {
@@ -314,7 +291,6 @@
           optionMenu.$destroy();
         },
         onBackspace: (evt, scope) => {
-          console.log('onBackspace', scope);
           evt.preventDefault();
           evt.stopPropagation();
           optionMenu.$destroy();
@@ -323,7 +299,6 @@
           navInstance.detachListener();
         },
         onClosed: (scope) => {
-          console.log(scope);
           navInstance.attachListener();
           optionMenu = null;
         }
@@ -339,7 +314,7 @@
       }
     });
     request.onsuccess = (res) => {
-      console.log(res)
+      console.log(res) // TODO
     }
     request.onerror = (err) => {
       showDialog("Warning",  err.target.error.message || err.target.error.name)
@@ -355,7 +330,7 @@
       }
     });
     request.onsuccess = (res) => {
-      console.log(res)
+      console.log(res) // TODO
     }
     request.onerror = (err) => {
       showDialog("Warning",  err.target.error.message || err.target.error.name)
@@ -419,7 +394,55 @@
   }
 
   function remove(user) {
-    // TODO
+    const index = contactDb.findIndex((i) => {
+      return i.id === user.id
+    })
+    if (index > -1) {
+      dialog = new Dialog({
+        target: document.body,
+        props: {
+          title: 'Confirmation',
+          body: `Are you sure to remove ${user.name[0]} from phonebook ?`,
+          softKeyLeftText: 'Cancel',
+          softKeyCenterText: '',
+          softKeyRightText: 'Yes',
+          onSoftkeyLeft: (evt) => {
+            dialog.$destroy();
+          },
+          onSoftkeyRight: (evt) => {
+            showLoadingBar();
+            const request = navigator.mozContacts.remove(user);
+            request.onsuccess = (result) => {
+              contactDb.splice(index, 1);
+              searchContacts(searchInput)
+              if (loadingBar != null) {
+                loadingBar.$destroy();
+              }
+            }
+            request.onerror = (err) => {
+              console.Warn(err)
+              if (loadingBar != null) {
+                loadingBar.$destroy();
+              }
+            }
+            dialog.$destroy();
+          },
+          onEnter: (evt) => {},
+          onBackspace: (evt) => {
+            evt.preventDefault();
+            evt.stopPropagation();
+            dialog.$destroy();
+          },
+          onOpened: () => {
+            navInstance.detachListener();
+          },
+          onClosed: () => {
+            navInstance.attachListener();
+            dialog = null;
+          }
+        }
+      });
+    }
   }
 
 </script>
