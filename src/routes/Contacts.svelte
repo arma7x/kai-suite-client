@@ -310,7 +310,7 @@
       }
     });
     request.onsuccess = (res) => {
-      console.log(res) // TODO
+      console.log(res) // TODO reload getDeviceContacts()
     }
     request.onerror = (err) => {
       showDialog("Warning",  err.target.error.message || err.target.error.name)
@@ -318,6 +318,7 @@
   }
 
   function edit(user) {
+     // TODO, built-in edit contact form
     const request = new MozActivity({
       name: "update",
       data: {
@@ -326,7 +327,7 @@
       }
     });
     request.onsuccess = (res) => {
-      console.log(res) // TODO
+      console.log(res)
     }
     request.onerror = (err) => {
       showDialog("Warning",  err.target.error.message || err.target.error.name)
