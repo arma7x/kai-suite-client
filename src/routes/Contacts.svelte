@@ -1,14 +1,15 @@
 <script lang="ts">
-  import '../utils/contact2vcard';
-  import '../utils/setImmediate';
-  import '../utils/l10n';
-  import '../utils/text_normalizer';
+  import '../synchub/contact2vcard';
+  import '../synchub/setImmediate';
+  import '../synchub/l10n';
+  import '../synchub/text_normalizer';
 
   import { navigate as goto } from "svelte-navigator";
   import { createKaiNavigator } from '../utils/navigation';
   import { onMount, onDestroy } from 'svelte';
   import { getDeviceContacts } from '../synchub/utils';
   import { ListView, TextInputDialog, LoadingBar, Dialog, OptionMenu } from '../components';
+  import ContactForm from '../synchub/ContactForm.svelte'
 
   export let location: any;
   export let navigate: any;
@@ -16,6 +17,7 @@
 
   const chunkSize = 50;
 
+  let contactForm: ContactForm;
   let dialog: Dialog;
   let optionMenu: OptionMenu;
   let loadingBar: LoadingBar;
@@ -87,32 +89,81 @@
     navInstance.detachListener();
   });
 
-  function showDialog(title, body) {
-    dialog = new Dialog({
-      target: document.body,
-      props: {
-        title: title,
-        body: body,
-        softKeyCenterText: 'hide',
-        onSoftkeyLeft: (evt) => {},
-        onSoftkeyRight: (evt) => {},
-        onEnter: (evt) => {
-          dialog.$destroy();
-        },
-        onBackspace: (evt) => {
-          evt.preventDefault();
-          evt.stopPropagation();
-          dialog.$destroy();
-        },
-        onOpened: () => {
-          navInstance.detachListener();
-        },
-        onClosed: () => {
-          navInstance.attachListener();
-          dialog = null;
-        }
-      }
+  function showContactForm(contact) {
+    const target = { givenName: contact.givenName, familyName: contact.familyName, tel: contact.tel }
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        contactForm = new ContactForm({
+          target: document.body,
+          props: {
+            title: contact.id != null && contact.id != "undefined" ? 'Edit Contact' : 'New Contact',
+            contact: target,
+            softKeyLeftText: 'Cancel',
+            softKeyCenterText: '',
+            softKeyRightText: 'Save',
+            onSoftkeyLeft: (evt) => {
+              reject();
+              contactForm.$destroy();
+            },
+            onSoftkeyRight: (evt, data) => {
+              if (data.tel == null) {
+                reject('Phone number is required');
+              } else {
+                contact.givenName = data.givenName
+                contact.familyName = data.familyName
+                contact.tel = data.tel
+                resolve(contact);
+              }
+              contactForm.$destroy();
+            },
+            onEnter: (evt) => {},
+            onBackspace: (evt) => {
+              reject();
+              evt.preventDefault();
+              evt.stopPropagation();
+              contactForm.$destroy();
+            },
+            onOpened: () => {
+              navInstance.detachListener();
+            },
+            onClosed: () => {
+              navInstance.attachListener();
+              contactForm = null;
+            }
+          }
+        });
+      }, 100);
     });
+  }
+
+  function showDialog(title, body) {
+    setTimeout(() => {
+      dialog = new Dialog({
+        target: document.body,
+        props: {
+          title: title,
+          body: body,
+          softKeyCenterText: 'hide',
+          onSoftkeyLeft: (evt) => {},
+          onSoftkeyRight: (evt) => {},
+          onEnter: (evt) => {
+            dialog.$destroy();
+          },
+          onBackspace: (evt) => {
+            evt.preventDefault();
+            evt.stopPropagation();
+            dialog.$destroy();
+          },
+          onOpened: () => {
+            navInstance.detachListener();
+          },
+          onClosed: () => {
+            navInstance.attachListener();
+            dialog = null;
+          }
+        }
+      });
+    }, 100);
   }
 
   function showLoadingBar() {
@@ -251,7 +302,7 @@
   function showOptionMenu() {
     const user = pages[pageCursor][navInstance.verticalNavIndex]
     let opts = [
-      { title: 'Edit[TODO]', subtitle: null },
+      { title: 'Edit', subtitle: null },
       { title: 'Call', subtitle: null },
       { title: 'Send Message', subtitle: null },
       { title: 'Share', subtitle: null },
@@ -303,35 +354,28 @@
   }
 
   function create() {
-    const request = new MozActivity({
-      name: "new",
-      data: {
-        type: "webcontacts/contact"
-      }
+    const user = new mozContact();
+    showContactForm(user)
+    .then(contact => {
+      console.log(contact)
+      // navigator.mozContacts.save(contact)
+    })
+    .catch(err => {
+      if (err)
+        showDialog("Warning",  err.toString())
     });
-    request.onsuccess = (res) => {
-      console.log(res) // TODO reload getDeviceContacts()
-    }
-    request.onerror = (err) => {
-      showDialog("Warning",  err.target.error.message || err.target.error.name)
-    }
   }
 
   function edit(user) {
-     // TODO, built-in edit contact form
-    const request = new MozActivity({
-      name: "update",
-      data: {
-        type: "webcontacts/contact",
-        params: user
-      }
+    showContactForm(user)
+    .then(contact => {
+      console.log(contact)
+      // navigator.mozContacts.save(contact)
+    })
+    .catch(err => {
+      if (err)
+        showDialog("Warning",  err.toString())
     });
-    request.onsuccess = (res) => {
-      console.log(res)
-    }
-    request.onerror = (err) => {
-      showDialog("Warning",  err.target.error.message || err.target.error.name)
-    }
   }
 
   function call(user) {
@@ -395,50 +439,52 @@
       return i.id === user.id
     })
     if (index > -1) {
-      dialog = new Dialog({
-        target: document.body,
-        props: {
-          title: 'Confirmation',
-          body: `Are you sure to remove ${user.name[0]} from phonebook ?`,
-          softKeyLeftText: 'Cancel',
-          softKeyCenterText: '',
-          softKeyRightText: 'Yes',
-          onSoftkeyLeft: (evt) => {
-            dialog.$destroy();
-          },
-          onSoftkeyRight: (evt) => {
-            showLoadingBar();
-            const request = navigator.mozContacts.remove(user);
-            request.onsuccess = (result) => {
-              contactDb.splice(index, 1);
-              searchContacts(searchInput)
-              if (loadingBar != null) {
-                loadingBar.$destroy();
+      setTimeout(() => {
+        dialog = new Dialog({
+          target: document.body,
+          props: {
+            title: 'Confirmation',
+            body: `Are you sure to remove ${user.name[0]} from phonebook ?`,
+            softKeyLeftText: 'Cancel',
+            softKeyCenterText: '',
+            softKeyRightText: 'Yes',
+            onSoftkeyLeft: (evt) => {
+              dialog.$destroy();
+            },
+            onSoftkeyRight: (evt) => {
+              showLoadingBar();
+              const request = navigator.mozContacts.remove(user);
+              request.onsuccess = (result) => {
+                contactDb.splice(index, 1);
+                searchContacts(searchInput)
+                if (loadingBar != null) {
+                  loadingBar.$destroy();
+                }
               }
-            }
-            request.onerror = (err) => {
-              console.Warn(err)
-              if (loadingBar != null) {
-                loadingBar.$destroy();
+              request.onerror = (err) => {
+                console.Warn(err)
+                if (loadingBar != null) {
+                  loadingBar.$destroy();
+                }
               }
+              dialog.$destroy();
+            },
+            onEnter: (evt) => {},
+            onBackspace: (evt) => {
+              evt.preventDefault();
+              evt.stopPropagation();
+              dialog.$destroy();
+            },
+            onOpened: () => {
+              navInstance.detachListener();
+            },
+            onClosed: () => {
+              navInstance.attachListener();
+              dialog = null;
             }
-            dialog.$destroy();
-          },
-          onEnter: (evt) => {},
-          onBackspace: (evt) => {
-            evt.preventDefault();
-            evt.stopPropagation();
-            dialog.$destroy();
-          },
-          onOpened: () => {
-            navInstance.detachListener();
-          },
-          onClosed: () => {
-            navInstance.attachListener();
-            dialog = null;
           }
-        }
-      });
+        });
+      }, 100)
     }
   }
 
