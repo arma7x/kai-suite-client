@@ -207,7 +207,8 @@
       props: {
         title: 'Search Contacs',
         softKeyLeftText: 'Cancel',
-        softKeyCenterText: 'ok',
+        softKeyCenterText: 'search',
+        softKeyRightText: 'Reset',
         value: searchInput,
         placeholder: 'Enter search keyword',
         type: 'text',
@@ -217,6 +218,8 @@
         },
         onSoftkeyRight: (evt, value) => {
           console.log('onSoftkeyRight', value);
+          searchContacts("");
+          contactSearchDialog.$destroy();
         },
         onEnter: (evt, value) => {
           console.log('onEnter', value);
