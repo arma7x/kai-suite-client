@@ -82,12 +82,18 @@
       }
     });
     document.addEventListener('keydown', callButtonHandler);
+    navigator.mozContacts.addEventListener('contactchange', oncontactchange)
   });
 
   onDestroy(() => {
     document.removeEventListener('keydown', callButtonHandler);
+    navigator.mozContacts.removeEventListener('contactchange', oncontactchange)
     navInstance.detachListener();
   });
+
+  function oncontactchange(evt) {
+    console.log(evt)
+  }
 
   function showContactForm(contact) {
     const target = { givenName: contact.givenName, familyName: contact.familyName, tel: contact.tel }
