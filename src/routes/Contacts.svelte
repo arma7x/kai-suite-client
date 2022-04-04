@@ -131,12 +131,12 @@
   }
 
   function prevPage(p) {
-    const { appBar } = getAppProp();
     if (pages[p - 1] != null) {
       navInstance.verticalNavIndex = -1
       pageCursor = p - 1;
       contactList = []
       setTimeout(() => {
+        const { appBar } = getAppProp();
         appBar.setTitleText(`${name}(${pageCursor+1}/${pages.length}) [${pages[pageCursor].length}]`);
         contactList = pages[pageCursor]
         setTimeout(() => {
@@ -144,22 +144,16 @@
         }, 200)
       }, 100)
       //console.log(pageCursor, contactList)
-    } else {
-      appBar.setTitleText(`${name}(0)`);
-      contactList = []
-      setTimeout(() => {
-        navInstance.navigateListNav(1);
-      }, 200)
     }
   }
 
   function nextPage(p) {
-    const { appBar } = getAppProp();
     if (pages[p + 1] != null) {
       navInstance.verticalNavIndex = -1
       pageCursor = p + 1;
       contactList = []
       setTimeout(() => {
+        const { appBar } = getAppProp();
         appBar.setTitleText(`${name}(${pageCursor+1}/${pages.length}) [${pages[pageCursor].length}]`);
         contactList = pages[pageCursor]
         setTimeout(() => {
@@ -167,12 +161,6 @@
         }, 200)
       }, 100)
       //console.log(pageCursor, contactList)
-    } else {
-      appBar.setTitleText(`${name}(0)`);
-      contactList = []
-      setTimeout(() => {
-        navInstance.navigateListNav(1);
-      }, 200)
     }
   }
 
@@ -239,7 +227,15 @@
         const chunk = searchResult.slice(i, i + chunkSize);
         pages.push(chunk);
       }
-      nextPage(pageCursor)
+      if (searchResult.length > 0) {
+        nextPage(pageCursor)
+      } else {
+        appBar.setTitleText(`${name}(0)`);
+        contactList = []
+        setTimeout(() => {
+          navInstance.navigateListNav(1);
+        }, 200)
+      }
     } else {
       pages = []
       console.log('reset searchContacts', searchInput.length)
