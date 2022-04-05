@@ -61,7 +61,7 @@
   onMount(() => {
     const { appBar, softwareKey } = getAppProp();
     appBar.setTitleText(name);
-    softwareKey.setText({ left: "Search", center: "SELECT", right: "Options" });
+    softwareKey.setText({ left: "Search", center: "CALL", right: "Options" });
     navInstance.attachListener();
     showLoadingBar();
     getDeviceContacts()
@@ -223,8 +223,8 @@
     }
   }
 
-  function select(user) {
-    console.log(user)
+  function onSelect(user) {
+    call(user)
   }
 
   function callButtonHandler(evt) {
@@ -540,7 +540,7 @@
 
 <main id="phonebook-screen" data-pad-top="28" data-pad-bottom="30">
   {#each contactList as user}
-  <ListView className="contactsNav" title="{user.name[0]}" subtitle="{user.tel[0].value}" onClick={() => select(user)}/>
+  <ListView className="contactsNav" title="{user.name[0]}" subtitle="{user.tel[0].value}" onClick={() => onSelect(user)}/>
   {/each}
 </main>
 
