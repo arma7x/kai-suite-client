@@ -115,7 +115,7 @@
               if (data.tel == null) {
                 reject('Phone number is required');
               } else {
-                console.log(data)
+                // console.log(data)
                 contact.name = data.name
                 contact.givenName = data.givenName
                 contact.familyName = data.familyName
@@ -202,7 +202,7 @@
           navInstance.navigateListNav(1);
         }, 200)
       }, 100)
-      //console.log(pageCursor, contactList)
+      // console.log(pageCursor, contactList)
     }
   }
 
@@ -219,7 +219,7 @@
           navInstance.navigateListNav(1);
         }, 200)
       }, 100)
-      //console.log(pageCursor, contactList)
+      // console.log(pageCursor, contactList)
     }
   }
 
@@ -275,12 +275,12 @@
     searchInput = keyword ? keyword : '';
     if (searchInput) {
       pages = []
-      console.log('search searchContacts', searchInput.length)
+      // console.log('search searchContacts', searchInput.length)
       const searchResult = contactDb.filter((user) => {
         const cmp = user.name[0].toLocaleLowerCase().indexOf(searchInput.toLocaleLowerCase());
         return cmp > -1;
       })
-      console.log('searchResult', searchResult.length)
+      // console.log('searchResult', searchResult.length)
       pageCursor = -1;
       for (let i = 0; i < searchResult.length; i += chunkSize) {
         const chunk = searchResult.slice(i, i + chunkSize);
@@ -297,7 +297,7 @@
       }
     } else {
       pages = []
-      console.log('reset searchContacts', searchInput.length)
+      // console.log('reset searchContacts', searchInput.length)
       pageCursor = -1;
       for (let i = 0; i < contactDb.length; i += chunkSize) {
         const chunk = contactDb.slice(i, i + chunkSize);
@@ -393,8 +393,32 @@
   function edit(user) {
     showContactForm(user)
     .then(contact => {
-      console.log(contact)
-      // navigator.mozContacts.save(contact)
+      // console.log(contact)
+      const index = contactDb.findIndex((i) => {
+        return i.id === contact.id
+      })
+      if (index > -1) {
+        navigator.mozContacts.save(contact)
+        .then(() => {
+          return navigator.mozContacts.find({ filterBy: ['tel'], filterValue: contact.tel[0].value, filterOp: 'equals', filterLimit: 100 })
+        })
+        .then(result => {
+          if (result.length === 0) {
+            showDialog("Warning",  "Fail update contact")
+            return
+          } else if (result.length > 1) {
+            result.sort((a,b) => (a.updated < b.updated) ? 1 : ((b.updated < a.updated) ? -1 : 0))
+          }
+          contactDb[index] = result[0]
+          searchContacts(searchInput)
+          showDialog("Success",  "Contact was updated")
+        })
+        .catch(err => {
+          console.warn(err)
+        });
+      } else {
+        showDialog("Warning",  "Contact not exist")
+      }
     })
     .catch(err => {
       if (err)
