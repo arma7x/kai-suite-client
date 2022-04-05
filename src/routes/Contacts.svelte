@@ -96,7 +96,7 @@
   }
 
   function showContactForm(contact) {
-    const target = { givenName: contact.givenName, familyName: contact.familyName, tel: contact.tel }
+    const target = { name: contact.name, givenName: contact.givenName, familyName: contact.familyName, tel: contact.tel }
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         contactForm = new ContactForm({
@@ -115,6 +115,8 @@
               if (data.tel == null) {
                 reject('Phone number is required');
               } else {
+                console.log(data)
+                contact.name = data.name
                 contact.givenName = data.givenName
                 contact.familyName = data.familyName
                 contact.tel = data.tel
@@ -363,8 +365,24 @@
     const user = new mozContact();
     showContactForm(user)
     .then(contact => {
-      console.log(contact)
-      // navigator.mozContacts.save(contact)
+      navigator.mozContacts.save(contact)
+      .then(() => {
+        return navigator.mozContacts.find({ filterBy: ['tel'], filterValue: contact.tel[0].value, filterOp: 'equals', filterLimit: 100 })
+      })
+      .then(result => {
+        if (result.length === 0) {
+          showDialog("Warning",  "Fail create new contact")
+          return
+        } else if (result.length > 1) {
+          result.sort((a,b) => (a.updated < b.updated) ? 1 : ((b.updated < a.updated) ? -1 : 0))
+        }
+        contactDb.push(result[0])
+        searchContacts(searchInput)
+        showDialog("Success",  "New contact was created")
+      })
+      .catch(err => {
+        console.warn(err)
+      });
     })
     .catch(err => {
       if (err)

@@ -93,7 +93,7 @@
   })
 
   function onGivenName(evt) {
-    const val = evt.target.value.toString();
+    const val = evt.target.value.trim().toString();
     if (val)
       contact.givenName = [val]
     else
@@ -102,7 +102,7 @@
   }
 
   function onFamilyName(evt) {
-    const val = evt.target.value.toString();
+    const val = evt.target.value.trim().toString();
     if (val)
       contact.familyName = [val]
     else
@@ -111,7 +111,7 @@
   }
 
   function onPhoneNumber(evt) {
-    const val = evt.target.value.toString();
+    const val = evt.target.value.trim().toString();
     if (val) {
       contact.tel = [{ "type": [type], "value": val }]
     } else {
@@ -122,6 +122,15 @@
 
   function updateName() {
     let name = [];
+    if (contact.givenName != null && contact.givenName.length === 0) {
+      contact.givenName = null
+    }
+    if (contact.familyName != null && contact.familyName.length === 0) {
+      contact.familyName = null
+    }
+    if (contact.tel != null && contact.tel.length === 0) {
+      contact.tel = null
+    }
     if (contact.givenName != null && contact.givenName.length > 0)
       name.push(contact.givenName[0])
     if (contact.familyName != null && contact.familyName.length > 0)
@@ -151,7 +160,7 @@
 <style>
   .kai-dialog {
     width: 100%;
-    height: calc(100% - 20px);
+    height: calc(100% - 12px);
     bottom: 30px;
     position: fixed;
     background-color: rgba(0, 0, 0, 0.6);
@@ -160,7 +169,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-height: calc(100% - 74px);
+    max-height: calc(100% - 66px);
     bottom: 30px;
     position: fixed;
     background-color: #ffffff;
@@ -177,7 +186,7 @@
     font-weight: 200;
   }
   .kai-dialog > .kai-dialog-content > .kai-dialog-body {
-    max-height: calc(100% - 86px);
+    max-height: calc(100% - 78px);
     overflow: scroll;
   }
 </style>
