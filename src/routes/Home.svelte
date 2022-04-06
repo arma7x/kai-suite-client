@@ -261,8 +261,11 @@
 
 <main id="home-screen" data-pad-top="28" data-pad-bottom="30">
   <ListView className="{navClass}" title="{getAppProp().localization.langByLocale('contacts_label', currentLocale)}" subtitle="{getAppProp().localization.langByLocale('contacts_label_info', currentLocale)}" onClick={() => navigateHandler('contacts')}/>
+<!--
   <ListView className="{navClass}" title="{getAppProp().localization.langByLocale('change_locale', currentLocale)}" subtitle="{getAppProp().localization.langByLocale('change_locale_subtitle', currentLocale)}" onClick={changeLocale}/>
   <Separator title="Configuration" />
+-->
+  <Separator title="Connection" />
   <TextInputField className="{navClass}" label="Ip Address" placeholder="Placeholder" value="{ipAddress}" type="text" onInput="{onInputIp}" onFocus="{onFocusIp}" onBlur="{onBlurIp}" />
   <TextInputField className="{navClass}" label="Port" placeholder="Placeholder" value="{port}" type="tel" onInput="{onInputPort}" onFocus="{onFocusPort}" onBlur="{onBlurPort}" />
   <Button className="{navClass}" text="{conBtnLabel}" onClick={toggleConnection}>

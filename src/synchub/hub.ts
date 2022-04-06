@@ -26,7 +26,6 @@ class SyncHub {
 
   connect(ipAddress: string, port: string) {
     if (isValidIpPort(ipAddress, port) === true && this.status === false) {
-      console.log(this.statusListener);
       this.ipAddress = ipAddress
       this.port = port
       this.ws = new WebSocket(`ws://${this.ipAddress}:${this.port}/`)
@@ -220,7 +219,7 @@ class SyncHub {
           .then((res) => {
             data.persons = res.persons;
             data.metadata = res.metadata;
-            console.log("TxSyncLocalContact:", Object.keys(data.persons).length, Object.keys(data.metadata).length);
+            // console.log("TxSyncLocalContact:", Object.keys(data.persons).length, Object.keys(data.metadata).length);
             return getKaiContacts()
           })
           .then((kaicontacts) => {
@@ -234,10 +233,10 @@ class SyncHub {
                     deleteList.push(metadata[id]);
                   }
                 }
-                console.log('pushList:', pushList);
-                console.log('syncList:', syncList);
-                console.log('deleteList:', deleteList);
-                console.log('mergedList:', mergedList);
+                // console.log('pushList:', pushList);
+                // console.log('syncList:', syncList);
+                // console.log('deleteList:', deleteList);
+                // console.log('mergedList:', mergedList);
                 const txd = { push_list: pushList, sync_list: syncList, merged_list: mergedList, delete_list: deleteList }
                 const tx = { flag: 10, data: JSON.stringify(txd) }
                 this.ws.send(JSON.stringify(tx))
@@ -247,9 +246,9 @@ class SyncHub {
             const metadata = data.metadata;
             const persons = data.persons;
             let kaicontactsElapsed = Object.keys(kaicontacts).length;
-            console.log('kaicontacts:', Object.keys(kaicontacts).length);
-            console.log('persons:', Object.keys(data.persons).length);
-            console.log('metadata:', Object.keys(data.metadata).length);
+            // console.log('kaicontacts:', Object.keys(kaicontacts).length);
+            // console.log('persons:', Object.keys(data.persons).length);
+            // console.log('metadata:', Object.keys(data.metadata).length);
 
             if (kaicontactsElapsed > 0) {
               for (var _kid in kaicontacts) {
@@ -352,11 +351,11 @@ class SyncHub {
             }
           })
           .catch((err) => {
-            console.log(err)
-            console.log('pushList:', []);
-            console.log('syncList:', []);
-            console.log('deleteList:', []);
-            console.log('mergedList:', []);
+            console.warn(err)
+            // console.log('pushList:', []);
+            // console.log('syncList:', []);
+            // console.log('deleteList:', []);
+            // console.log('mergedList:', []);
             const txd = { push_list: pushList, sync_list: syncList, merged_list: mergedList, delete_list: deleteList }
             const tx = { flag: 10, data: JSON.stringify(txd) }
             this.ws.send(JSON.stringify(tx))
@@ -371,7 +370,7 @@ class SyncHub {
             .then((kaicontacts) => {
               // console.log(kaicontacts)
               let kaicontactsElapsed = Object.keys(kaicontacts).length;
-              console.log('kaicontacts:', kaicontactsElapsed)
+              // console.log('kaicontacts:', kaicontactsElapsed)
               if (kaicontactsElapsed > 0) {
                 for (var _kid in kaicontacts) {
                   const kaicontact = kaicontacts[_kid];
@@ -395,7 +394,7 @@ class SyncHub {
                       if (result.length === 0) {
                         kaicontactsElapsed--;
                         if (kaicontactsElapsed <= 0) {
-                          console.log('pushList:', pushList);
+                          // console.log('pushList:', pushList);
                           const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
                           const tx = { flag: 10, data: JSON.stringify(txd) }
                           this.ws.send(JSON.stringify(tx))
@@ -406,7 +405,7 @@ class SyncHub {
                         pushList.push({ kai_contact: result[0], metadata: mt });
                         kaicontactsElapsed--;
                         if (kaicontactsElapsed <= 0) {
-                          console.log('pushList:', pushList);
+                          // console.log('pushList:', pushList);
                           const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
                           const tx = { flag: 10, data: JSON.stringify(txd) }
                           this.ws.send(JSON.stringify(tx))
@@ -416,7 +415,7 @@ class SyncHub {
                     .catch((err) => {
                       kaicontactsElapsed--;
                       if (kaicontactsElapsed <= 0) {
-                        console.log('pushList:', pushList);
+                        // console.log('pushList:', pushList);
                         const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
                         const tx = { flag: 10, data: JSON.stringify(txd) }
                         this.ws.send(JSON.stringify(tx))
@@ -425,7 +424,7 @@ class SyncHub {
                   } else {
                     kaicontactsElapsed--;
                     if (kaicontactsElapsed <= 0) {
-                      console.log('pushList:', pushList);
+                      // console.log('pushList:', pushList);
                       const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
                       const tx = { flag: 10, data: JSON.stringify(txd) }
                       this.ws.send(JSON.stringify(tx))
@@ -433,15 +432,15 @@ class SyncHub {
                   }
                 }
               } else {
-                console.log('pushList:', pushList);
+                // console.log('pushList:', pushList);
                 const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
                 const tx = { flag: 10, data: JSON.stringify(txd) }
                 this.ws.send(JSON.stringify(tx))
               }
             })
             .catch((err) => {
-              console.log(err)
-              console.log('pushList:', pushList);
+              console.warn(err)
+              // console.log('pushList:', pushList);
               const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
               const tx = { flag: 10, data: JSON.stringify(txd) }
               this.ws.send(JSON.stringify(tx))
@@ -453,7 +452,7 @@ class SyncHub {
 
             data.persons = res.persons;
             data.metadata = res.metadata;
-            console.log("TxRestoreLocalContacts:", Object.keys(data.persons).length, Object.keys(data.metadata).length);
+            // console.log("TxRestoreLocalContacts:", Object.keys(data.persons).length, Object.keys(data.metadata).length);
             let elapsed = Object.keys(data.persons).length;
             if (elapsed > 0) {
               for (var key in data.persons) {
@@ -510,37 +509,37 @@ class SyncHub {
             }
           })
           .catch(err => {
-            console.log(err)
+            console.warn(err)
             restore()
           })
         } else if (protocol.flag === 9) { // TxSyncSMS9
-          console.log("TxSyncSMS:", data);
+          // console.log("TxSyncSMS:", data);
           this.syncSMS()
         } else if (protocol.flag === 11) { // TxSendSMS11
-          console.log("TxSendSMS:", data)
+          // console.log("TxSendSMS:", data)
           let sendOpts = getSIMServiceId(data.iccId)
           getMessageSegments(data.message)
           .then((segments) => {
             this.processMessageSegments(data.receivers, segments, sendOpts);
           })
           .catch((err) => {
-            console.log(err)
+            console.warn(err)
           });
         } else if (protocol.flag === 13) { // TxSyncSMSRead13
           if (data.id != null) {
-            console.log("TxSyncSMSRead13:", data)
+            // console.log("TxSyncSMSRead13:", data)
             data.id.forEach(id => {
               const req = navigator.mozMobileMessage.markMessageRead(id, true)
               req.onsuccess = () => {
-                console.log("Success markMessageRead", id);
+                // console.log("Success markMessageRead", id);
               }
               req.onerror = () => {
-                console.log("Error markMessageRead", id);
+                // console.log("Error markMessageRead", id);
               }
             })
           }
         } else if (protocol.flag === 15) { // TxSyncSMSDelete15
-          console.log("TxSyncSMSDelete15:", data.id)
+          // console.log("TxSyncSMSDelete15:", data.id)
           const req = navigator.mozMobileMessage.delete(data.id)
           req.onsuccess = () => {
             this.syncSMS()
@@ -612,7 +611,7 @@ class SyncHub {
         }
         let requests = navigator.mozMobileMessage.send(receivers, content, sendOpts);
         let done = requests.length
-        console.log("Request Length:", done)
+        // console.log("Request Length:", done)
         requests.forEach((request) => {
           request.onsuccess = function(result) {
             done--
@@ -636,12 +635,12 @@ class SyncHub {
     if (this.ws != null) {
       this.getSMS()
       .then(result => {
-        console.log(result)
+        // console.log(result)
         const tx = { flag: 12, data: JSON.stringify(result) }
         this.ws.send(JSON.stringify(tx))
       })
       .catch(err => {
-        console.log(err)
+        console.warn(err)
       })
     }
   }
@@ -668,7 +667,7 @@ class SyncHub {
               }
             }
             cursorMessage.onerror = (err) => {
-              console.log(err)
+              console.warn(err)
               cursorThread.continue()
             }
           }
@@ -677,7 +676,7 @@ class SyncHub {
         }
       }
       cursorThread.onerror = (err) => {
-        console.log(err)
+        console.warn(err)
         reject(reject)
       }
     })

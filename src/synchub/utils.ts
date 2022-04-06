@@ -261,7 +261,7 @@ const showNotification = (title, body, requireInteraction = false, closeOnClick 
       requireInteraction: requireInteraction
     });
     notification.onerror = function(err) {
-      console.log(err);
+      console.warn(err);
     }
     notification.onclick = function(event) {
       if (navigator.mozApps) {

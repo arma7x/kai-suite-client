@@ -3,9 +3,9 @@
   "description": "PC Suite/Companion for KaiOS device",
   "version": "1.0.0",
   "launch_path": "/index.html",
-  "theme": "#ff3e00",
-  "theme_color": "#ff3e00",
-  "background_color": "#ff3e00",
+  "theme": "#7a558f",
+  "theme_color": "#7a558f",
+  "background_color": "#7a558f",
   "fullscreen": "true",
   "chrome": {
     "statusbar": "overlap"

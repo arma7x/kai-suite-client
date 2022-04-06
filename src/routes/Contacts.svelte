@@ -297,6 +297,7 @@
       }
     } else {
       pages = []
+      contactList = []
       // console.log('reset searchContacts', searchInput.length)
       pageCursor = -1;
       for (let i = 0; i < contactDb.length; i += chunkSize) {
@@ -308,7 +309,10 @@
   }
 
   function showOptionMenu() {
-    const user = pages[pageCursor][navInstance.verticalNavIndex]
+    let user;
+    try {
+      user = pages[pageCursor][navInstance.verticalNavIndex]
+    } catch (e) {}
     let opts = [
       { title: 'Edit', subtitle: null },
       { title: 'Call', subtitle: null },
@@ -435,7 +439,7 @@
       }
     });
     request.onsuccess = (res) => {
-      console.log(res)
+      // console.log(res)
     }
     request.onerror = (err) => {
       showDialog("Warning",  err.target.error.message || err.target.error.name)
@@ -451,7 +455,7 @@
       }
     });
     request.onsuccess = (res) => {
-      console.log(res)
+      // console.log(res)
     }
     request.onerror = (err) => {
       showDialog("Warning",  err.target.error.message || err.target.error.name)
@@ -473,7 +477,7 @@
           }
         });
         request.onsuccess = (res) => {
-          console.log(res)
+          // console.log(res)
         }
         request.onerror = (err) => {
           showDialog("Warning",  err.target.error.message || err.target.error.name)
