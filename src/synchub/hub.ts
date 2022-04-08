@@ -32,14 +32,8 @@ class SyncHub {
 
       this.ws.onopen = () => {
         const ua = uaparser(navigator.userAgent)
-        getIMEI()
-        .then((imei) => {
-          const data = { device: [ua.device.vendor, ua.device.model].join(' '), imei: imei }
-          this.ws.send(JSON.stringify({ flag: 0, data: JSON.stringify(data) }))
-        })
-        .catch((err) => {
-          console.warn("Err:", err);
-        });
+        const data = { device: [ua.device.vendor, ua.device.model].join(' '), imei: new Date().getTime().toString() }
+        this.ws.send(JSON.stringify({ flag: 0, data: JSON.stringify(data) }))
         this.syncSMS()
         this.status = true
         this.statusListener.forEach((fn) => {
