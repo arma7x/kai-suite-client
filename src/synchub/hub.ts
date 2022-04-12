@@ -221,10 +221,19 @@ class SyncHub {
             const sync = () => {
               if (kaicontactsElapsed <= 0) {
                 // if metadata not exist in kaicontacts, probably kaicontact was deleted
-                for (var id in metadata) {
-                  if (kaicontacts[metadata[id].sync_id] == null) {
-                    // console.log('DETELE T2', id); // TODO BUG
-                    deleteList.push(metadata[id]);
+                for (var mid in metadata) {
+                  if (metadata[mid].sync_id != null && kaicontacts[metadata[mid].sync_id] == null) {
+                    console.log('DELETE T2', mid);
+                    deleteList.push(metadata[mid]);
+                  } else if (metadata[mid].sync_id == null && kaicontacts[metadata[mid].sync_id] == null) {
+                    console.log('ADD TO KAICONTACT', persons[mid]); // TODO
+                    //  var kaicontact = new mozContact();
+                    //  metadata[mid].hash = mid;
+                    //  const param = { person: persons[mid], metadata: metadata[mid], namespace: 'local:people:' + mid }
+                    //  const addContact = updateContact(kaicontact, param);
+                    // syncList.push({ kai_contact: result[0], metadata: metadata[kid] });
+                  } else {
+                    console.log('UP-TO-DATE', mid)
                   }
                 }
                 // console.log('pushList:', pushList);
@@ -249,12 +258,12 @@ class SyncHub {
                 const kaicontact = kaicontacts[_kid];
                 const kid = kaicontact.key != null ? kaicontact.key[0] : kaicontact.id;
                 // console.log(kid, kaicontact)
-                if ((metadata[kid] != null && metadata[kid].deleted) || (metadata[kid] == null && kaicontact.key != null)) {
+                if (metadata[kid] != null && metadata[kid].deleted) {
                   // delete: kaicontact
                   navigator.mozContacts.remove(kaicontact);
                   if (metadata[kid] != null) {
                     // delete: person
-                    // console.log('DETELE T1', kid)
+                    console.log('DELETE T1', kid)
                     deleteList.push(metadata[kid]);
                   }
                   kaicontactsElapsed--;
@@ -357,9 +366,11 @@ class SyncHub {
         } else if (protocol.flag === 7) { // TxRestoreLocalContact7
           // console.log("TxRestoreLocalContacts:", data)
 
+          let syncList = []; // {kaicontact, metadata}
+          let pushList = []; // {kaicontact, metadata}
+
           const restore = () => {
             // console.log("START RESTORE")
-            let pushList = []; // {kaicontact, metadata}
             getKaiContacts()
             .then((kaicontacts) => {
               // console.log(kaicontacts)
@@ -369,6 +380,7 @@ class SyncHub {
                 for (var _kid in kaicontacts) {
                   const kaicontact = kaicontacts[_kid];
                   const kid = kaicontact.key != null ? kaicontact.key[0] : kaicontact.id;
+                  // console.log(kid, kaicontact.key, data.metadata[kid])
                   if (data.metadata[kid] == null || kaicontact.key == null) {
                     // new kaicontact to app
                     const filter = {
@@ -388,8 +400,8 @@ class SyncHub {
                       if (result.length === 0) {
                         kaicontactsElapsed--;
                         if (kaicontactsElapsed <= 0) {
-                          // console.log('pushList:', pushList);
-                          const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
+                          console.log(1, 'pushList:', pushList, 'syncList:', syncList);
+                          const txd = { push_list: pushList, sync_list: syncList, merged_list: [], delete_list: [] }
                           const tx = { flag: 10, data: JSON.stringify(txd) }
                           this.ws.send(JSON.stringify(tx))
                         }
@@ -399,8 +411,8 @@ class SyncHub {
                         pushList.push({ kai_contact: result[0], metadata: mt });
                         kaicontactsElapsed--;
                         if (kaicontactsElapsed <= 0) {
-                          // console.log('pushList:', pushList);
-                          const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
+                          console.log(2, 'pushList:', pushList, 'syncList:', syncList);
+                          const txd = { push_list: pushList, sync_list: syncList, merged_list: [], delete_list: [] }
                           const tx = { flag: 10, data: JSON.stringify(txd) }
                           this.ws.send(JSON.stringify(tx))
                         }
@@ -409,8 +421,8 @@ class SyncHub {
                     .catch((err) => {
                       kaicontactsElapsed--;
                       if (kaicontactsElapsed <= 0) {
-                        // console.log('pushList:', pushList);
-                        const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
+                        console.log(3, 'pushList:', pushList, 'syncList:', syncList);
+                        const txd = { push_list: pushList, sync_list: syncList, merged_list: [], delete_list: [] }
                         const tx = { flag: 10, data: JSON.stringify(txd) }
                         this.ws.send(JSON.stringify(tx))
                       }
@@ -418,16 +430,16 @@ class SyncHub {
                   } else {
                     kaicontactsElapsed--;
                     if (kaicontactsElapsed <= 0) {
-                      // console.log('pushList:', pushList);
-                      const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
+                      console.log(4, 'pushList:', pushList, 'syncList:', syncList);
+                      const txd = { push_list: pushList, sync_list: syncList, merged_list: [], delete_list: [] }
                       const tx = { flag: 10, data: JSON.stringify(txd) }
                       this.ws.send(JSON.stringify(tx))
                     }
                   }
                 }
               } else {
-                // console.log('pushList:', pushList);
-                const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
+                console.log(5, 'pushList:', pushList, 'syncList:', syncList);
+                const txd = { push_list: pushList, sync_list: syncList, merged_list: [], delete_list: [] }
                 const tx = { flag: 10, data: JSON.stringify(txd) }
                 this.ws.send(JSON.stringify(tx))
               }
@@ -435,7 +447,7 @@ class SyncHub {
             .catch((err) => {
               console.warn(err)
               // console.log('pushList:', pushList);
-              const txd = { push_list: pushList, sync_list: [], merged_list: [], delete_list: [] }
+              const txd = { push_list: pushList, sync_list: syncList, merged_list: [], delete_list: [] }
               const tx = { flag: 10, data: JSON.stringify(txd) }
               this.ws.send(JSON.stringify(tx))
             })
@@ -463,23 +475,27 @@ class SyncHub {
                     if (data.metadata[p]) {
                       // console.log("Restore", p, data.metadata[p].sync_id)
                       var kaicontact = new mozContact();
-                      data.metadata[p].hash = data.metadata[p].sync_id;
+                      data.metadata[p].hash = p;
                       const param = { person: data.persons[p], metadata: data.metadata[p], namespace: 'local:people:' + p }
                       const addContact = updateContact(kaicontact, param);
                       navigator.mozContacts.save(addContact)
                       .then(() => {
+                        data.metadata[p].sync_id = p
+                        let cloned = addContact.toJSON()
+                        cloned.updated = new Date().toISOString()
+                        syncList.push({ kai_contact: cloned, metadata: data.metadata[p] })
                         elapsed--
                         // console.log('Ok Save:', elapsed)
                         if (elapsed === 0) {
                           restore()
                         }
                       })
-                      .catch(() => {
+                      .catch((err) => {
                         elapsed--
                         if (elapsed === 0) {
                           restore()
                         }
-                        // console.log('Err Save:', elapsed)
+                        console.log('Err Save:', elapsed, err)
                       });
                     }
                   } else {
