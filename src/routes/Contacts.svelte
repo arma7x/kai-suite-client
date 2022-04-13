@@ -92,7 +92,7 @@
   });
 
   function oncontactchange(evt) {
-    console.log(evt)
+    // console.log(evt)
   }
 
   function showContactForm(contact) {

@@ -218,24 +218,8 @@ class SyncHub {
           })
           .then((kaicontacts) => {
 
-            const sync = () => {
-              if (kaicontactsElapsed <= 0) {
-                // if metadata not exist in kaicontacts, probably kaicontact was deleted
-                for (var mid in metadata) {
-                  if (metadata[mid].sync_id != null && kaicontacts[metadata[mid].sync_id] == null) {
-                    console.log('DELETE T2', mid);
-                    deleteList.push(metadata[mid]);
-                  } else if (metadata[mid].sync_id == null && kaicontacts[metadata[mid].sync_id] == null) {
-                    console.log('ADD TO KAICONTACT', persons[mid]); // TODO
-                    //  var kaicontact = new mozContact();
-                    //  metadata[mid].hash = mid;
-                    //  const param = { person: persons[mid], metadata: metadata[mid], namespace: 'local:people:' + mid }
-                    //  const addContact = updateContact(kaicontact, param);
-                    // syncList.push({ kai_contact: result[0], metadata: metadata[kid] });
-                  } else {
-                    console.log('UP-TO-DATE', mid)
-                  }
-                }
+            const stage2 = () => {
+              if (metadataElapsed <= 0) {
                 // console.log('pushList:', pushList);
                 // console.log('syncList:', syncList);
                 // console.log('deleteList:', deleteList);
@@ -246,8 +230,52 @@ class SyncHub {
               }
             }
 
+            const stage1 = () => {
+              if (kaicontactsElapsed <= 0) {
+                if (metadataElapsed > 0) {
+                  for (var _id in metadata) {
+                    const mid = _id;
+                    if (metadata[mid].sync_id != null && kaicontacts[metadata[mid].sync_id] == null) {
+                      // if metadata sync_id is not null and not exist in kaicontacts, probably kaicontact was deleted
+                      // console.log('DELETE T2', mid);
+                      deleteList.push(metadata[mid]);
+                      metadataElapsed--
+                      stage2()
+                    } else if (metadata[mid].sync_id == null && kaicontacts[metadata[mid].sync_id] == null) {
+                      // console.log('ADD TO KAICONTACT', persons[mid]); // TODO
+                      var kaicontact = new mozContact();
+                      metadata[mid].hash = mid;
+                      const param = { person: persons[mid], metadata: metadata[mid], namespace: 'local:people:' + mid }
+                      const addContact = updateContact(kaicontact, param);
+                      navigator.mozContacts.save(addContact)
+                      .then(() => {
+                        metadata[mid].sync_id = mid
+                        let cloned = addContact.toJSON()
+                        cloned.updated = new Date().toISOString()
+                        syncList.push({ kai_contact: cloned, metadata: metadata[mid] })
+                        metadataElapsed--
+                        stage2()
+                      })
+                      .catch((err) => {
+                        metadataElapsed--
+                        console.warn('Err Save:', metadataElapsed, err)
+                        stage2()
+                      });
+                    } else {
+                      // console.log('UP-TO-DATE', mid)
+                      metadataElapsed--
+                      stage2()
+                    }
+                  }
+                } else {
+                  stage2()
+                }
+              }
+            }
+
             const metadata = data.metadata;
             const persons = data.persons;
+            let metadataElapsed = Object.keys(metadata).length;
             let kaicontactsElapsed = Object.keys(kaicontacts).length;
             // console.log('kaicontacts:', Object.keys(kaicontacts).length);
             // console.log('persons:', Object.keys(data.persons).length);
@@ -263,11 +291,11 @@ class SyncHub {
                   navigator.mozContacts.remove(kaicontact);
                   if (metadata[kid] != null) {
                     // delete: person
-                    console.log('DELETE T1', kid)
+                    // console.log('DELETE T1', kid)
                     deleteList.push(metadata[kid]);
                   }
                   kaicontactsElapsed--;
-                  sync();
+                  stage1();
                 } else if (metadata[kid] && metadata[kid].deleted === false && persons[kid]) {
                   if (new Date(metadata[kid].sync_updated) > kaicontact.updated) {
                     // console.log('person > kaicontact', kid)
@@ -288,18 +316,18 @@ class SyncHub {
                     .then((result) => {
                       if (result.length === 0) {
                         kaicontactsElapsed--;
-                        sync();
+                        stage1();
                       } else {
                         // update metadata[kid].hash on desktop app
                         metadata[kid].sync_updated = result[0].updated;
                         syncList.push({ kai_contact: result[0], metadata: metadata[kid] });
                         kaicontactsElapsed--;
-                        sync();
+                        stage1();
                       }
                     })
                     .catch((err) => {
                       kaicontactsElapsed--;
-                      sync();
+                      stage1();
                     });
                   } else if (new Date(metadata[kid].sync_updated) < kaicontact.updated) {
                     // console.log('kaicontact > person', kid)
@@ -308,11 +336,11 @@ class SyncHub {
                     metadata[kid].sync_updated = kaicontact.updated;
                     syncList.push({ kai_contact: kaicontact, metadata: metadata[kid] });
                     kaicontactsElapsed--;
-                    sync();
+                    stage1();
                   } else {
                     // console.log('kaicontact === person', kid)
                     kaicontactsElapsed--;
-                    sync();
+                    stage1();
                   }
                 } else if (metadata[kid] == null || kaicontact.key == null) {
                   // new kaicontact to app
@@ -331,26 +359,26 @@ class SyncHub {
                   .then((result) => {
                     if (result.length === 0) {
                       kaicontactsElapsed--;
-                      sync();
+                      stage1();
                     } else {
                       const mt = { sync_id: kid, sync_updated: kaicontact.updated, hash: "new" }
                       pushList.push({ kai_contact: result[0], metadata: mt });
                       kaicontactsElapsed--;
-                      sync();
+                      stage1();
                     }
                   })
                   .catch((err) => {
                     kaicontactsElapsed--;
-                    sync();
+                    stage1();
                   });
                 } else {
                   console.warn('TRACE', kaicontact);
                   kaicontactsElapsed--;
-                  sync();
+                  stage1();
                 }
               }
             } else {
-              sync();
+              stage1();
             }
           })
           .catch((err) => {
