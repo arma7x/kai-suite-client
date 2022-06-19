@@ -4,5 +4,7 @@
   "change_locale_subtitle": "クリックしてアプリのロケールを変更します",
   "select_locale": "ロケールを選択",
   "contacts_label": "電話帳",
-  "contacts_label_info": "クリックして電話帳を開く"
+  "contacts_label_info": "クリックして電話帳を開く",
+  "events_label": "イベント",
+  "events_label_info": "クリックしてイベントを表示"
 }

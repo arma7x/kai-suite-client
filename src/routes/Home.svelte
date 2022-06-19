@@ -17,7 +17,7 @@
   let conBtnLabel: string = 'Connect';
   let dialog: Dialog;
   let inputSoftwareKey: SoftwareKey;
-  
+
   let locales:any = [
     { title: 'English - United State', subtitle: 'en-US' },
     { title: 'Japanese', subtitle: 'jp-JP' },
@@ -261,6 +261,7 @@
 
 <main id="home-screen" data-pad-top="28" data-pad-bottom="30">
   <ListView className="{navClass}" title="{getAppProp().localization.langByLocale('contacts_label', currentLocale)}" subtitle="{getAppProp().localization.langByLocale('contacts_label_info', currentLocale)}" onClick={() => navigateHandler('contacts')}/>
+  <ListView className="{navClass}" title="{getAppProp().localization.langByLocale('events_label', currentLocale)}" subtitle="{getAppProp().localization.langByLocale('events_label_info', currentLocale)}" onClick={() => navigateHandler('events')}/>
 <!--
   <ListView className="{navClass}" title="{getAppProp().localization.langByLocale('change_locale', currentLocale)}" subtitle="{getAppProp().localization.langByLocale('change_locale_subtitle', currentLocale)}" onClick={changeLocale}/>
   <Separator title="Configuration" />

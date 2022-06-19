@@ -6,6 +6,7 @@ type StatusListenerFn = (status: boolean) => void;
 
 import { isValidIpPort, updateContact, clone, getSIMServiceId, shift2Normal, getMessageSegments, showNotification, getIMEI, getKaiContacts } from "./utils"
 import uaparser from 'ua-parser-js';
+import * as localforage from 'localforage';
 
 class SyncHub {
 
@@ -14,13 +15,13 @@ class SyncHub {
   ipAddress: string;
   port: string;
   statusListener: Array<StatusListenerFn> = [];
- 
+
   constructor() {
     navigator.mozSetMessageHandler('sms-received', () => {
-      this.syncSMS() 
+      this.syncSMS()
     })
     navigator.mozSetMessageHandler('sms-sent', () => {
-      this.syncSMS() 
+      this.syncSMS()
     })
   }
 
@@ -585,6 +586,15 @@ class SyncHub {
           req.onerror = () => {
             this.syncSMS()
           }
+        } else if (protocol.flag === 17) { // TxSyncEvents17
+            // const EVENTS = localforage.createInstance({ name : "EVENTS" });
+            // get EVENTS['local']
+            // const txd = { namespace: data.namespace, unsync_events: [] }
+            // const tx = { flag: 14, data: JSON.stringify(txd) }
+            // this.ws.send(JSON.stringify(tx))
+        } else if (protocol.flag === 19) { // TxSyncEvents19
+            // set EVENTS[data.namespace] = data.events
+            // set remove data.synced_events from EVENTS['local']
         }
       }
     }
@@ -593,7 +603,7 @@ class SyncHub {
   addStatusListener(fn: StatusListenerFn) {
     this.statusListener.push(fn);
   }
- 
+
   removeStatusListener(fn: StatusListenerFn) {
     const index = this.statusListener.indexOf(fn);
     if (index > -1) {

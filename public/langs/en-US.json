@@ -4,5 +4,7 @@
   "change_locale_subtitle": "Click to change app locale",
   "select_locale": "Select Locale",
   "contacts_label": "Phonebook",
-  "contacts_label_info": "Click to open phonebook"
+  "contacts_label_info": "Click to open phonebook",
+  "events_label": "Events",
+  "events_label_info": "Click to view events"
 }

@@ -1,14 +1,17 @@
 <script lang="ts">
   import { Router, Route, Link } from 'svelte-navigator';
   import { AppBar, SoftwareKey } from './components';
-  import { Home, Contacts } from './routes';
+  import { Home, Contacts, Events } from './routes';
   import { onMount, onDestroy } from 'svelte';
   import { Localization } from './utils/localization';
   import SyncHub from './synchub/hub';
+  import * as localforage from 'localforage';
 
   export let localization = new Localization('en-US', 'langs');
   export let appBar;
   export let softwareKey;
+
+  localforage.setDriver(localforage.INDEXEDDB);
 
   const hub = new SyncHub();
 
@@ -31,6 +34,9 @@
     </Route>
     <Route path="contacts" let:location let:navigate>
       <svelte:component this="{Contacts}" {location} {navigate} {getAppProp}/>
+    </Route>
+    <Route path="events" let:location let:navigate>
+      <svelte:component this="{Events}" {location} {navigate} {getAppProp}/>
     </Route>
   </main>
   <SoftwareKey bind:this={softwareKey} />
