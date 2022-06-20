@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Router, Route, Link } from 'svelte-navigator';
   import { AppBar, SoftwareKey } from './components';
-  import { Home, Contacts, Events } from './routes';
+  import { Home, Contacts, Events, AddEventForm } from './routes';
   import { onMount, onDestroy } from 'svelte';
   import { Localization } from './utils/localization';
   import SyncHub from './synchub/hub';
@@ -37,6 +37,9 @@
     </Route>
     <Route path="events" let:location let:navigate>
       <svelte:component this="{Events}" {location} {navigate} {getAppProp}/>
+    </Route>
+    <Route path="addEventForm" let:location let:navigate>
+      <svelte:component this="{AddEventForm}" {location} {navigate} {getAppProp}/>
     </Route>
   </main>
   <SoftwareKey bind:this={softwareKey} />

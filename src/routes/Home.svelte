@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Route, navigate as goto } from "svelte-navigator";
   import { createKaiNavigator } from '../utils/navigation';
-  import { Dialog, OptionMenu, ListView, Separator, Button, TextInputField, SoftwareKey } from '../components';
+  import { OptionMenu, ListView, Separator, Button, TextInputField, SoftwareKey } from '../components';
   import { onMount, onDestroy } from 'svelte';
   import uaparser from 'ua-parser-js';
 
@@ -15,7 +15,6 @@
   let ipAddress: string = '192.168.43.33';
   let port: string = '4444';
   let conBtnLabel: string = 'Connect';
-  let dialog: Dialog;
   let inputSoftwareKey: SoftwareKey;
 
   let locales:any = [
@@ -33,7 +32,7 @@
     softkeyRightListener: function(evt) {
       if (inputSoftwareKey)
         return;
-      openDialog();
+      navigateHandler('addEventForm');
     },
     enterListener: function(evt) {
       if (inputSoftwareKey)
@@ -49,41 +48,6 @@
   };
 
   let navInstance = createKaiNavigator(navOptions);
-
-  function openDialog() {
-    // TODO navigate to add local event
-    dialog = new Dialog({
-      target: document.body,
-      props: {
-        title: 'Intro',
-        body: `Svelte is a radical new approach to building user interfaces. Whereas traditional frameworks like React and Vue do the bulk of their work in the browser, Svelte shifts that work into a compile step that happens when you build your app. Instead of using techniques like virtual DOM diffing, Svelte writes code that surgically updates the DOM when the state of your app changes. We're proud that Svelte was recently voted the most loved web framework with the most satisfied developers in a pair of industry surveys. We think you'll love it too. Read the introductory blog post to learn more.`,
-        softKeyCenterText: 'hide',
-        onSoftkeyLeft: (evt) => {
-          // console.log('onSoftkeyLeft');
-        },
-        onSoftkeyRight: (evt) => {
-          // console.log('onSoftkeyRight');
-        },
-        onEnter: (evt) => {
-          // console.log('onEnter');
-          dialog.$destroy();
-        },
-        onBackspace: (evt) => {
-          // console.log('onBackspace');
-          evt.preventDefault();
-          evt.stopPropagation();
-          dialog.$destroy();
-        },
-        onOpened: () => {
-          navInstance.detachListener();
-        },
-        onClosed: () => {
-          navInstance.attachListener();
-          dialog = null;
-        }
-      }
-    });
-  }
 
   function onButtonExit(evt) {
     window.close();
