@@ -91,9 +91,7 @@
     navInstance.detachListener();
   });
 
-  function oncontactchange(evt) {
-    // console.log(evt)
-  }
+  function oncontactchange(evt) {}
 
   function showContactForm(contact) {
     const target = { name: contact.name, givenName: contact.givenName, familyName: contact.familyName, tel: contact.tel }
@@ -115,7 +113,6 @@
               if (data.tel == null) {
                 reject('Phone number is required');
               } else {
-                // console.log(data)
                 contact.name = data.name
                 contact.givenName = data.givenName
                 contact.familyName = data.familyName
@@ -202,7 +199,6 @@
           navInstance.navigateListNav(1);
         }, 200)
       }, 100)
-      // console.log(pageCursor, contactList)
     }
   }
 
@@ -219,7 +215,6 @@
           navInstance.navigateListNav(1);
         }, 200)
       }, 100)
-      // console.log(pageCursor, contactList)
     }
   }
 
@@ -230,7 +225,6 @@
   function callButtonHandler(evt) {
     const user = pages[pageCursor][navInstance.verticalNavIndex]
     if (evt.key === 'Call' && user != null) {
-      // console.log('callButtonHandler', evt.key, pageCursor, navInstance.verticalNavIndex)
       call(user)
     }
   }
@@ -275,12 +269,10 @@
     searchInput = keyword ? keyword : '';
     if (searchInput) {
       pages = []
-      // console.log('search searchContacts', searchInput.length)
       const searchResult = contactDb.filter((user) => {
         const cmp = user.name[0].toLocaleLowerCase().indexOf(searchInput.toLocaleLowerCase());
         return cmp > -1;
       })
-      // console.log('searchResult', searchResult.length)
       pageCursor = -1;
       for (let i = 0; i < searchResult.length; i += chunkSize) {
         const chunk = searchResult.slice(i, i + chunkSize);
@@ -298,7 +290,6 @@
     } else {
       pages = []
       contactList = []
-      // console.log('reset searchContacts', searchInput.length)
       pageCursor = -1;
       for (let i = 0; i < contactDb.length; i += chunkSize) {
         const chunk = contactDb.slice(i, i + chunkSize);
@@ -397,7 +388,6 @@
   function edit(user) {
     showContactForm(user)
     .then(contact => {
-      // console.log(contact)
       const index = contactDb.findIndex((i) => {
         return i.id === contact.id
       })
@@ -438,9 +428,7 @@
         number: user.tel[0].value
       }
     });
-    request.onsuccess = (res) => {
-      // console.log(res)
-    }
+    request.onsuccess = (res) => {}
     request.onerror = (err) => {
       showDialog("Warning",  err.target.error.message || err.target.error.name)
     }
@@ -454,9 +442,7 @@
         number: user.tel[0].value
       }
     });
-    request.onsuccess = (res) => {
-      // console.log(res)
-    }
+    request.onsuccess = (res) => {}
     request.onerror = (err) => {
       showDialog("Warning",  err.target.error.message || err.target.error.name)
     }
@@ -476,9 +462,7 @@
             filenames: [filename]
           }
         });
-        request.onsuccess = (res) => {
-          // console.log(res)
-        }
+        request.onsuccess = (res) => {}
         request.onerror = (err) => {
           showDialog("Warning",  err.target.error.message || err.target.error.name)
         }

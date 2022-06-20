@@ -19,8 +19,31 @@
     softkeyRightListener: function(evt) {
       if (eventList[this.verticalNavIndex] != null) {
         if (eventList[this.verticalNavIndex]['_editable'] == true) {
-          console.log('Show prompt dialog to delete local event');
-          // TODO delete from local event
+          const ID = eventList[this.verticalNavIndex].id;
+          const EVENTS = localforage.createInstance({ name : "EVENTS" })
+          EVENTS.getItem('local')
+          .then((evts) => {
+            if (evts == null) {
+              evts = [];
+            }
+            const idx = evts.findIndex((evt) => evt.id === ID);
+            if (idx > -1) {
+              evts.splice(idx, 1);
+              EVENTS.setItem('local', evts)
+              .then(() => {
+                setTimeout(() => {
+                  this.navigateListNav(-1);
+                }, 500);
+                loadEvents();
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
         } else {
           showDialog("Warning", 'Please use Google Calendar to delete this event');
         }
@@ -33,7 +56,6 @@
       }
     },
     backspaceListener: function(evt) {
-      console.log('backspaceListener', name);
       evt.preventDefault();
       goto(-1);
     }
@@ -41,29 +63,34 @@
 
   let navInstance = createKaiNavigator(navOptions);
 
-  onMount(async () => {
-    console.log('onMount', name);
+  onMount(() => {
     const { appBar, softwareKey } = getAppProp();
     appBar.setTitleText(name);
     softwareKey.setText({ left: '', center: 'VIEW', right: 'Delete' });
     navInstance.attachListener();
+    loadEvents();
+    // TODO sort eventList by start.date or dateTime asc
+  });
+
+  onDestroy(() => {
+    navInstance.detachListener();
+  });
+
+  async function loadEvents() {
+    eventList = [];
     const EVENTS = localforage.createInstance({ name : "EVENTS" })
     const keys: Array<string> = await EVENTS.keys();
     for (var x in keys) {
       const key = keys[x];
       const evts = await EVENTS.getItem(key);
+      if (evts == null)
+        continue;
       evts.forEach(evt => {
         evt['_editable'] = key == 'local';
       });
-      eventList = [...evts];
+      eventList = [...eventList, ...evts];
     }
-    // TODO sort eventList by start.date or dateTime asc
-  });
-
-  onDestroy(() => {
-    console.log('onDestroy', name);
-    navInstance.detachListener();
-  });
+  }
 
   function showDialog(title, body) {
     setTimeout(() => {
@@ -104,7 +131,9 @@
 
 <main id="events-screen" data-pad-top="28" data-pad-bottom="30">
   {#each eventList as event}
-  <ListView className="eventsNav" title="{event.summary || '(No title)'}" subtitle="{event.start.date || new Date(event.start.dateTime).toLocaleString()}" onClick={() => onSelect(event)}/>
+  <ListView className="eventsNav" title="{event.summary || '(No title)'}" subtitle="{event.start.date || new Date(event.start.dateTime).toLocaleString()}" onClick={() => onSelect(event)}>
+    <span slot="rightWidget" class="{ event._editable ? 'kai-icon-checkbox-unchecked' : 'kai-icon-checkbox-checked'}"></span>
+  </ListView>
   {/each}
 </main>
 

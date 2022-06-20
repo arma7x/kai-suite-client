@@ -54,7 +54,6 @@
   }
 
   function onFocusIp(evt) {
-    // console.log('onFocus onFocusIp');
     inputSoftwareKey = new SoftwareKey({
       target: document.body,
       props: {
@@ -67,7 +66,6 @@
   }
 
   function onBlurIp(evt) {
-    // console.log('onBlur onBlurIp');
     if (inputSoftwareKey) {
       inputSoftwareKey.$destroy();
       inputSoftwareKey = null;
@@ -75,12 +73,10 @@
   }
 
   function onInputIp(evt) {
-    // console.log('onInput onInputIp', evt.target.value);
     ipAddress = evt.target.value.toString();
   }
 
   function onFocusPort(evt) {
-    // console.log('onFocus onFocusPort');
     inputSoftwareKey = new SoftwareKey({
       target: document.body,
       props: {
@@ -93,7 +89,6 @@
   }
 
   function onBlurPort(evt) {
-    // console.log('onBlur onBlurPort');
     if (inputSoftwareKey) {
       inputSoftwareKey.$destroy();
       inputSoftwareKey = null;
@@ -101,7 +96,6 @@
   }
 
   function onInputPort(evt) {
-    // console.log('onInput onInputPort', evt.target.value);
     port = evt.target.value.toString();
   }
 
@@ -116,20 +110,14 @@
         focusIndex: idx,
         options: locales,
         softKeyCenterText: 'select',
-        onSoftkeyRight: (evt, scope) => {
-          // console.log('onSoftkeyRight', scope);
-        },
-        onSoftkeyLeft: (evt, scope) => {
-          // console.log('onSoftkeyRight', scope);
-        },
+        onSoftkeyRight: (evt, scope) => {},
+        onSoftkeyLeft: (evt, scope) => {},
         onEnter: (evt, scope) => {
-          // console.log('onEnter', scope);
           getAppProp().localization.loadLocale(scope.selected.subtitle);
           currentLocale = getAppProp().localization.defaultLocale;
           localeMenu.$destroy();
         },
         onBackspace: (evt, scope) => {
-          // console.log('onBackspace', scope);
           evt.preventDefault();
           evt.stopPropagation();
           localeMenu.$destroy();
@@ -138,7 +126,6 @@
           navInstance.detachListener();
         },
         onClosed: (scope) => {
-          // console.log(scope);
           navInstance.attachListener();
           localeMenu = null;
         }
@@ -147,7 +134,6 @@
   }
 
   onMount(() => {
-    console.log('onMount', name);
     currentLocale = getAppProp().localization.defaultLocale;
     const { appBar, softwareKey } = getAppProp();
     appBar.setTitleText(name);
@@ -159,7 +145,6 @@
   });
 
   onDestroy(() => {
-    console.log('onDestroy', name);
     navInstance.detachListener();
     getAppProp().hub.removeStatusListener(onStatusChange)
   });
@@ -182,7 +167,6 @@
   }
 
   function onStatusChange(status: boolean) {
-    console.log('onStatusChange', status);
     if (status === true)
       conBtnLabel = 'Disconnect'
     else

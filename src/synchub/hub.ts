@@ -589,13 +589,9 @@ class SyncHub {
         } else if (protocol.flag === 17) { // TxSyncEvents17
             const EVENTS = localforage.createInstance({ name : "EVENTS" })
             EVENTS.getItem('local')
-            .then((evts:any) => {
-                let unsync_events = []
-                if (evts == null) {
-                    evts = {}
-                }
-                for (var x in evts) {
-                    unsync_events.push(evts[x])
+            .then((unsync_events:any) => {
+                if (unsync_events == null) {
+                    unsync_events = []
                 }
                 const txd = { namespace: data.namespace, unsync_events: unsync_events }
                 const tx = { flag: 14, data: JSON.stringify(txd) }
@@ -606,7 +602,8 @@ class SyncHub {
             });
         } else if (protocol.flag === 19) { // TxSyncEvents19
             const EVENTS = localforage.createInstance({ name : "EVENTS" })
-            EVENTS.setItem(data.namespace, data.events)
+            EVENTS.setItem('local', data.unsync_events || []);
+            EVENTS.setItem(data.namespace, data.events || [])
             .then(() => {
                 return EVENTS.getItem(data.namespace);
             })
@@ -616,7 +613,6 @@ class SyncHub {
             .catch((err) => {
                 console.log(err)
             });
-            // TODO remove data.synced_events from EVENTS['local']
         }
       }
     }

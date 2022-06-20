@@ -3,6 +3,7 @@
   import { navigate as goto } from "svelte-navigator";
   import { createKaiNavigator } from '../utils/navigation';
   import { SoftwareKey, ListView, Separator, TextInputField, TextAreaField, DatePicker, TimePicker} from '../components';
+  import * as localforage from 'localforage';
 
   export let location: any;
   export let navigate: any;
@@ -26,12 +27,45 @@
       goto(-1);
     },
     softkeyRightListener: function(evt) {
+      const MN = '12:00:00 AM';
       if (inputSoftwareKey)
         return;
-        console.log(summary)
-        console.log(description)
-        console.log(startDate)
-        console.log(endDate)
+      if (endDate <= startDate)
+        return;
+      var evtObj = {
+        id: 'local_' + new Date().getTime().toString(),
+        start: {},
+        end: {},
+      }
+      if (summary.trim()) {
+        evtObj['summary'] = summary.trim();
+      }
+      if (description.trim()) {
+        evtObj['description'] = description.trim();
+      }
+      if (endDate.getTime() - startDate.getTime() === 86400000 && endDate.toLocaleTimeString() === MN && startDate.toLocaleTimeString() === MN) {
+        const offset = -((new Date().getTimezoneOffset()) * 60000);
+        evtObj['start']['date'] = new Date(startDate.getTime() + offset).toISOString().split('T')[0];
+        evtObj['end']['date'] = new Date(endDate.getTime() + offset).toISOString().split('T')[0];
+      } else {
+        evtObj['start']['dateTime'] = startDate.toISOString();
+        evtObj['end']['dateTime'] = endDate.toISOString();
+      }
+      const EVENTS = localforage.createInstance({ name : "EVENTS" })
+      EVENTS.getItem('local')
+      .then((evts:any) => {
+        if (evts == null) {
+          evts = []
+        }
+        evts = [...evts, evtObj];
+        return EVENTS.setItem('local', evts);
+      })
+      .then(() => {
+        goto(-1);
+      })
+      .catch((err) => {
+        console.log(err)
+      });
     },
     enterListener: function(evt) {
       if (inputSoftwareKey)
@@ -87,7 +121,7 @@
     description = evt.target.value.trim().toString();
   }
 
-  function openDatePicker(value) {
+  function openDatePicker(value, callback = () => {}) {
     datePicker = new DatePicker({
       target: document.body,
       props: {
@@ -96,19 +130,14 @@
         softKeyLeftText: 'Cancel',
         softKeyCenterText: 'save',
         onSoftkeyLeft: (evt, date) => {
-          console.log('onSoftkeyLeft', date);
           datePicker.$destroy();
         },
-        onSoftkeyRight: (evt, date) => {
-          console.log('onSoftkeyRight', date);
-        },
+        onSoftkeyRight: (evt, date) => {},
         onEnter: (evt, date) => {
-          console.log('onEnter', date);
-          value = date;
+          callback(date);
           datePicker.$destroy();
         },
         onBackspace: (evt, date) => {
-          console.log('onBackspace', date);
           evt.preventDefault();
           evt.stopPropagation();
           datePicker.$destroy();
@@ -117,7 +146,6 @@
           navInstance.detachListener();
         },
         onClosed: (date) => {
-          console.log('onClosed', date);
           navInstance.attachListener();
           datePicker = null;
         }
@@ -125,7 +153,7 @@
     });
   }
 
-  function openTimePicker(value) {
+  function openTimePicker(value, callback = () => {}) {
     timePicker = new TimePicker({
       target: document.body,
       props: {
@@ -135,19 +163,14 @@
         softKeyLeftText: 'Cancel',
         softKeyCenterText: 'save',
         onSoftkeyLeft: (evt, date) => {
-          console.log('onSoftkeyLeft', date);
           timePicker.$destroy();
         },
-        onSoftkeyRight: (evt, date) => {
-          console.log('onSoftkeyRight', date);
-        },
+        onSoftkeyRight: (evt, date) => {},
         onEnter: (evt, date) => {
-          console.log('onEnter', date);
-          value = date;
+          callback(date);
           timePicker.$destroy();
         },
         onBackspace: (evt, date) => {
-          console.log('onBackspace', date);
           evt.preventDefault();
           evt.stopPropagation();
           timePicker.$destroy();
@@ -156,7 +179,6 @@
           navInstance.detachListener();
         },
         onClosed: (date) => {
-          console.log('onClosed', date);
           navInstance.attachListener();
           timePicker = null;
         }
@@ -174,17 +196,33 @@
   <TextInputField className="addEventNav" label="Title" placeholder="Enter event title" value="{summary}" type="text" onInput="{onInputTitle}" {onFocus} {onBlur} />
   <TextAreaField className="addEventNav" label="Description" placeholder="Enter event description" value="{description}" type="text" rows={2} onInput="{onInputDesc}" {onFocus} {onBlur}/>
   <Separator title="Start" />
-  <ListView className="addEventNav" title="Date" subtitle="{startDate.toDateString()}" onClick={() => openDatePicker(startDate)}>
+  <ListView className="addEventNav" title="Date" subtitle="{startDate.toDateString()}" onClick={() => {
+    openDatePicker(startDate, (val) => {
+      startDate = val;
+    })
+  }}>
     <span slot="rightWidget" class="kai-icon-calendar" style="font-size:20px;"></span>
   </ListView>
-  <ListView className="addEventNav" title="Time" subtitle="{startDate.toLocaleTimeString()}" onClick={() => openTimePicker(startDate)}>
+  <ListView className="addEventNav" title="Time" subtitle="{startDate.toLocaleTimeString()}" onClick={() => {
+    openTimePicker(startDate, (val) => {
+      startDate = val;
+    });
+  }}>
     <span slot="rightWidget" class="kai-icon-favorite-on" style="font-size:20px;"></span>
   </ListView>
   <Separator title="End" />
-  <ListView className="addEventNav" title="Date" subtitle="{endDate.toDateString()}" onClick={() => openDatePicker(endDate)}>
+  <ListView className="addEventNav" title="Date" subtitle="{endDate.toDateString()}" onClick={() => {
+    openDatePicker(endDate, (val) => {
+      endDate = val;
+    });
+  }}>
     <span slot="rightWidget" class="kai-icon-calendar" style="font-size:20px;"></span>
   </ListView>
-  <ListView className="addEventNav" title="Time" subtitle="{endDate.toLocaleTimeString()}" onClick={() => openTimePicker(endDate)}>
+  <ListView className="addEventNav" title="Time" subtitle="{endDate.toLocaleTimeString()}" onClick={() => {
+    openTimePicker(endDate, (val) => {
+      endDate = val;
+    });
+  }}>
     <span slot="rightWidget" class="kai-icon-favorite-on" style="font-size:20px;"></span>
   </ListView>
 </main>
