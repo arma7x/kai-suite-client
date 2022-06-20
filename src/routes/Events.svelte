@@ -4,6 +4,7 @@
   import { onMount, onDestroy } from 'svelte';
   import * as localforage from 'localforage';
   import { ListView, Dialog } from '../components';
+  import EventModal from '../synchub/EventModal.svelte'
 
   export let location: any;
   export let navigate: any;
@@ -11,6 +12,7 @@
 
   let eventList: any = [];
   let dialog: Dialog;
+  let eventModal: EventModal;
   let name: string = 'Events';
 
   let navOptions = {
@@ -123,8 +125,30 @@
   }
 
   function onSelect(evt) {
-    // TODO show short event summary
-    console.log(evt.summary || '(No title)', evt.description || '(No description)', evt.start.date || new Date(evt.start.dateTime).toLocaleString(), evt.end.date || new Date(evt.end.dateTime).toLocaleString());
+      setTimeout(() => {
+        eventModal = new EventModal({
+          target: document.body,
+          props: {
+            title: 'Event',
+            event: evt,
+            onEnter: (evt) => {
+              eventModal.$destroy();
+            },
+            onBackspace: (evt) => {
+              evt.preventDefault();
+              evt.stopPropagation();
+              eventModal.$destroy();
+            },
+            onOpened: () => {
+              navInstance.detachListener();
+            },
+            onClosed: () => {
+              navInstance.attachListener();
+              eventModal = null;
+            }
+          }
+        });
+      }, 100);
   }
 
 </script>
