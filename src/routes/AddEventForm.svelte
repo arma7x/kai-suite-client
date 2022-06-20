@@ -195,7 +195,7 @@
 <main id="add-event-screen" data-pad-top="28" data-pad-bottom="30">
   <TextInputField className="addEventNav" label="Title" placeholder="Enter event title" value="{summary}" type="text" onInput="{onInputTitle}" {onFocus} {onBlur} />
   <TextAreaField className="addEventNav" label="Description" placeholder="Enter event description" value="{description}" type="text" rows={2} onInput="{onInputDesc}" {onFocus} {onBlur}/>
-  <Separator title="Start" />
+  <Separator title="When the event start ?" />
   <ListView className="addEventNav" title="Date" subtitle="{startDate.toDateString()}" onClick={() => {
     openDatePicker(startDate, (val) => {
       startDate = val;
@@ -210,7 +210,7 @@
   }}>
     <span slot="rightWidget" class="kai-icon-favorite-on" style="font-size:20px;"></span>
   </ListView>
-  <Separator title="End" />
+  <Separator title="When the event end ?" />
   <ListView className="addEventNav" title="Date" subtitle="{endDate.toDateString()}" onClick={() => {
     openDatePicker(endDate, (val) => {
       endDate = val;
