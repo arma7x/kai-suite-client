@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Route, navigate as goto } from "svelte-navigator";
   import { createKaiNavigator } from '../utils/navigation';
-  import { Dialog, OptionMenu, ListView, Separator, Button, TextInputField, Toast, Toaster, SoftwareKey } from '../components';
+  import { Dialog, OptionMenu, ListView, Separator, Button, TextInputField, SoftwareKey } from '../components';
   import { onMount, onDestroy } from 'svelte';
   import uaparser from 'ua-parser-js';
 
@@ -29,14 +29,11 @@
     softkeyLeftListener: function(evt) {
       if (inputSoftwareKey)
         return;
-      openDialog();
-      // console.log('softkeyLeftListener', name, this.verticalNavIndex);
     },
     softkeyRightListener: function(evt) {
       if (inputSoftwareKey)
         return;
-      toastMessage();
-      // console.log('softkeyRightListener', name, this.verticalNavIndex);
+      openDialog();
     },
     enterListener: function(evt) {
       if (inputSoftwareKey)
@@ -45,41 +42,16 @@
       if (navClasses[this.verticalNavIndex] != null) {
         navClasses[this.verticalNavIndex].click();
       }
-      // console.log('enterListener', name);
     },
-    backspaceListener: function(evt) {
-      // console.log('backspaceListener', name);
-    },
-    arrowLeftListener: function(evt) {
-      // console.log('arrowLeftListener', name);
-    },
-    arrowRightListener: function(evt) {
-      // console.log('arrowRightListener', name);
-    },
+    backspaceListener: function(evt) {},
+    arrowLeftListener: function(evt) {},
+    arrowRightListener: function(evt) {},
   };
 
   let navInstance = createKaiNavigator(navOptions);
 
-  function toastMessage(text = 'I\'m out after 2 second') {
-    const t = new Toast({
-      target: document.body,
-      props: {
-        options: {}
-      }
-    })
-    Toaster.push(text , {
-      dismissable: false,
-      intro: { y: -64 },
-      duration: 2000,
-      onpop: () => {
-        setTimeout(() => {
-          t.$destroy();
-        }, 4000);
-      }
-    })
-  }
-
   function openDialog() {
+    // TODO navigate to add local event
     dialog = new Dialog({
       target: document.body,
       props: {
@@ -215,7 +187,7 @@
     currentLocale = getAppProp().localization.defaultLocale;
     const { appBar, softwareKey } = getAppProp();
     appBar.setTitleText(name);
-    softwareKey.setText({ left: "", center: "SELECT", right: "" });
+    softwareKey.setText({ left: "", center: "SELECT", right: "+ Event" });
     navInstance.attachListener();
     getAppProp().hub.addStatusListener(onStatusChange)
     if (getAppProp().hub.status == true)

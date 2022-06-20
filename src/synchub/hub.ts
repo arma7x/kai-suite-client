@@ -587,14 +587,36 @@ class SyncHub {
             this.syncSMS()
           }
         } else if (protocol.flag === 17) { // TxSyncEvents17
-            // const EVENTS = localforage.createInstance({ name : "EVENTS" });
-            // get EVENTS['local']
-            // const txd = { namespace: data.namespace, unsync_events: [] }
-            // const tx = { flag: 14, data: JSON.stringify(txd) }
-            // this.ws.send(JSON.stringify(tx))
+            const EVENTS = localforage.createInstance({ name : "EVENTS" })
+            EVENTS.getItem('local')
+            .then((evts:any) => {
+                let unsync_events = []
+                if (evts == null) {
+                    evts = {}
+                }
+                for (var x in evts) {
+                    unsync_events.push(evts[x])
+                }
+                const txd = { namespace: data.namespace, unsync_events: unsync_events }
+                const tx = { flag: 14, data: JSON.stringify(txd) }
+                this.ws.send(JSON.stringify(tx))
+            })
+            .catch((err) => {
+                console.log(err)
+            });
         } else if (protocol.flag === 19) { // TxSyncEvents19
-            // set EVENTS[data.namespace] = data.events
-            // set remove data.synced_events from EVENTS['local']
+            const EVENTS = localforage.createInstance({ name : "EVENTS" })
+            EVENTS.setItem(data.namespace, data.events)
+            .then(() => {
+                return EVENTS.getItem(data.namespace);
+            })
+            .then((evts) => {
+                console.log(data.namespace, data.events);
+            })
+            .catch((err) => {
+                console.log(err)
+            });
+            // TODO remove data.synced_events from EVENTS['local']
         }
       }
     }
