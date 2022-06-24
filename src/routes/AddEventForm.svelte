@@ -92,6 +92,9 @@
 
   onDestroy(() => {
     navInstance.detachListener();
+    if (inputSoftwareKey) {
+        inputSoftwareKey.$destroy();
+    }
   })
 
   function onFocus(evt) {
