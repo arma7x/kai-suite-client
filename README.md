@@ -1,3 +1,5 @@
+# Please use this app https://github.com/arma7x/kaios-web-suite
+
 # Kai Suite client for KaiOS
 
 Kai Suite https://github.com/arma7x/kai-suite-app
